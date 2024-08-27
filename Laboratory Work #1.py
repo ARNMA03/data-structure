@@ -163,6 +163,3 @@ while True:
         user = None  # User must select a new Pokémon
         rounds_played += 1
         round_details.append([rounds_played, user_pick, final_user_power, computer_pick, final_computer_power, status])
-
-# hello my friend
-# gg na
