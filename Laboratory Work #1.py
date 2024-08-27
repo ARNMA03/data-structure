@@ -100,6 +100,7 @@ while True:
                 break
             elif game == "n":
                 user = None  # Reset user choice
+                final_user_power = 0
                 break
             elif game == "x":
                 ## Display Final Results
@@ -131,12 +132,9 @@ while True:
         while True:
             game = input(
                 "\n'N' for new character selection\n'X' to quit\nWould you like to proceed? ").lower()
-            if game == "c":
-                computer_key = rm.choice(list(
-                    pokemon_dict.keys())) if computer_key is None else computer_key  # Select a new computer Pokémon if needed
-                break
-            elif game == "n":
+            if game == "n":
                 user = None  # Reset user choice
+                final_user_power = 0
                 break
             elif game == "x":
                 ## Display Final Results
@@ -164,4 +162,3 @@ while True:
         user = None  # User must select a new Pokémon
         rounds_played += 1
         round_details.append([rounds_played, user_pick, final_user_power, computer_pick, final_computer_power, status])
-
