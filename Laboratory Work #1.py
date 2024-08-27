@@ -101,6 +101,7 @@ while True:
             elif game == "n":
                 user = None  # Reset user choice
                 final_user_power = 0
+                final_computer_power= 0
                 break
             elif game == "x":
                 ## Display Final Results
