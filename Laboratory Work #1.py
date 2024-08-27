@@ -32,7 +32,7 @@ Objective: Outsmart the computer by choosing the right Pokémon and securing as 
 Track your victories and see who reigns supreme in the final battle summary.
 """)
 
-## Display Pokemon List
+# Display Pokemon List
 counter = 0
 for key, value_name in pokemon_dict.items():
     print(f"{key}. {value_name[0]:<11}", end="")
@@ -41,16 +41,16 @@ for key, value_name in pokemon_dict.items():
         print()
         counter = 0
 
-## Initialize Game Variables
+# Initialize Game Variables
 rounds_played, user_wins, computer_wins, ties = 0, 0, 0, 0
 round_details = []
 user, computer_key = None, None
 final_user_power = 0  # Initialize winner's power
 final_computer_power = 0  # Initialize loser's power
 
-## Main Game Loop
+# Main Game Loop
 while True:
-    ## User Pokemon Selection
+    #  User Pokemon Selection
     if user is None:
         user = input("\nChoose your Pokemon: ").lower()
         if user not in pokemon_dict:
@@ -58,14 +58,14 @@ while True:
             user = None
             continue  # Prompt user again
 
-    ## Computer Pokemon Selection
+    # Computer Pokemon Selection
     if computer_key is None:
         computer_key = rm.choice(list(pokemon_dict.keys()))
 
     base_user = pokemon_dict[user][1] + final_user_power  # Use retained winner's power
     base_computer = pokemon_dict[computer_key][1] + final_computer_power  # Use retained loser's power
 
-    ## Power Calculation
+    # Power Calculation
     if pokemon_dict[user][2] < pokemon_dict[computer_key][2]:
         random_variation = rm.randrange(0, 45, 5)
         final_user_power = base_user + random_variation
@@ -75,11 +75,11 @@ while True:
         final_user_power = base_user - random_variation
         final_computer_power = base_computer + random_variation
 
-    ## Display Battle Results
+    # Display Battle Results
     print(f"User chose {pokemon_dict[user][0]} with power {final_user_power}")
     print(f"Computer chose {pokemon_dict[computer_key][0]} with power {final_computer_power}")
 
-    ## Determine Winner and Absorb Power
+    # Determine Winner and Absorb Power
     if final_user_power > final_computer_power:
         print("User won!")
         user_wins += 1
@@ -100,11 +100,11 @@ while True:
                 break
             elif game == "n":
                 user = None  # Reset user choice
-                final_user_power = 0
-                final_computer_power= 0
+                final_user_power = 0  # Reset user power
+                final_computer_power = 0  # Reset computer power
                 break
             elif game == "x":
-                ## Display Final Results
+                # Display Final Results
                 print("\nRound Details:")
                 print(tabulate(round_details,
                                headers=["Battle number", "User pokemon", "User power", "Computer pokemon",
@@ -138,7 +138,7 @@ while True:
                 final_user_power = 0
                 break
             elif game == "x":
-                ## Display Final Results
+                # Display Final Results
                 print("\nRound Details:")
                 print(tabulate(round_details,
                                headers=["Battle number", "User pokemon", "User power", "Computer pokemon",
