@@ -95,8 +95,7 @@ while True:
             game = input(
                 "\n'C' to continue to battle\n'N' for new character selection\n'X' to quit\nWould you like to proceed? ").lower()
             if game == "c":
-                computer_key = rm.choice(list(
-                    pokemon_dict.keys())) if computer_key is None else computer_key  # Select a new computer Pokémon if needed
+                computer_key = None  
                 break
             elif game == "n":
                 user = None  # Reset user choice
