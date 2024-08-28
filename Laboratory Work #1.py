@@ -162,3 +162,31 @@ while True:
         user = None  # User must select a new Pokémon
         rounds_played += 1
         round_details.append([rounds_played, user_pick, final_user_power, computer_pick, final_computer_power, status])
+        game = input(
+                "\n'C' to continue to battle\n'N' for new character selection\n'X' to quit\nWould you like to proceed? ").lower()
+            if game == "c":
+                computer_key = None
+                user = None
+                break
+            elif game == "n":
+                user = None  # Reset user choice
+                computer_key = None  # Reset computer choice
+                final_user_power = 0  # Reset user power
+                final_computer_power = 0  # Reset computer power
+                break
+            elif game == "x":
+                # Display Final Results
+                print("\nRound Details:")
+                print(tabulate(round_details,
+                               headers=["Battle number", "User pokemon", "User power", "Computer pokemon",
+                                        "Computer power", "Status"],
+                               tablefmt="grid"))
+                if user_wins > computer_wins:
+                    print("\nOverall Result: User won more rounds!")
+                elif computer_wins > user_wins:
+                    print("\nOverall Result: Computer won more rounds!")
+                else:
+                    print("\nOverall Result: It's a tie overall!")
+                exit()
+            else:
+                print("Invalid input, please try again.")
