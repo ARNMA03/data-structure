@@ -1,0 +1,12 @@
+pokemon_dict = {
+  "a": ["Jigglypuff", 45, 1],
+  "b": ["Pikachu", 50, 9],
+  "c": ["Eevee", 52, 5],
+  "d": ["Charmander", 55, 7],
+  "e": ["Squirtle", 58, 6],
+  "f": ["Bulbasaur", 60, 4],
+  "g": ["Gengar", 70, 10],
+  "h": ["Machamp", 75, 3],
+  "i": ["Snorlax", 80, 8],
+  "j": ["Mewtwo", 90, 2],
+}
