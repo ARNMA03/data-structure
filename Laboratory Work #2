@@ -1,4 +1,6 @@
-pokemon_dict = {
+import array
+
+pokemon_array = {
   "a": ["Jigglypuff", 45, 1],
   "b": ["Pikachu", 50, 9],
   "c": ["Eevee", 52, 5],
