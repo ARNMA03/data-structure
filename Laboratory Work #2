@@ -10,3 +10,8 @@ pokemon_dict = {
   "i": ["Snorlax", 80, 8],
   "j": ["Mewtwo", 90, 2],
 }
+p1 = []
+p2 = []
+while True:
+selection = ("Select a pokemon from the list: ")
+
