@@ -1,19 +1,17 @@
-import array
+import numpy as np
 
-pokemon_array = {
-  "a": ["Jigglypuff", 45, 1],
-  "b": ["Pikachu", 50, 9],
-  "c": ["Eevee", 52, 5],
-  "d": ["Charmander", 55, 7],
-  "e": ["Squirtle", 58, 6],
-  "f": ["Bulbasaur", 60, 4],
-  "g": ["Gengar", 70, 10],
-  "h": ["Machamp", 75, 3],
-  "i": ["Snorlax", 80, 8],
-  "j": ["Mewtwo", 90, 2],
-}
+pokemon_array = np.array([("1", "Jigglypuff", 45, 100, 10, 20),("2", "Pikachu", 50, 100, 10, 20),
+("3", "Eevee", 52, 100, 10, 20),("4", "Charmander", 55, 100, 10, 20),("5", "Squirtle", 58, 100, 10, 20),
+("6", "Bulbasaur", 60, 100, 10, 20),("7", "Gengar", 70, 100, 10, 20),("8", "Machamp", 75, 100, 10, 20),
+("9", "Snorlax", 80, 100, 10, 20),("10", "Mewtwo", 90, 100, 10, 20)], dtype='U1, U16, int, int, int, int')
+print(f'Pokemon list:\n{array_str}')
 p1 = []
 p2 = []
 while True:
-selection = ("Select a pokemon from the list: ")
-
+if len(p1) != 3:
+  selection = ("Select a pokemon from the list for Player 1: ")
+  p1.append(pokemon_array[int(selection) - 1])
+  
+elif len(p2) != 3:
+  selection = ("Select a pokemon from the list for Player 2: ")
+  p2.append(pokemon_array[int(selection) - 1])
