@@ -2,115 +2,353 @@ import numpy as np
 import random as rm
 from tabulate import tabulate
 
-# Define the Pokémon data structure
-list_dtype = [("name", "U16"), ("power", "i8"), ("health", "i8"), ("poison", "i8"), ("heal", "i8"), ("type", "U16")]
-pokemon_array = np.array([
-    ("Jigglypuff", 45, 100, 10, 20, "Normal"), 
-    ("Pikachu", 50, 100, 10, 20, "Electric"),
-    ("Eevee", 52, 100, 10, 20, "Normal"), 
-    ("Charmander", 55, 100, 10, 20, "Fire"),
-    ("Squirtle", 58, 100, 10, 20, "Water"),
-    ("Bulbasaur", 60, 100, 10, 20, "Grass"), 
-    ("Gengar", 70, 100, 10, 20, "Ghost"),
-    ("Machamp", 75, 100, 10, 20, "Fighting"),
-    ("Snorlax", 80, 100, 10, 20, "Normal"), 
-    ("Mewtwo", 90, 100, 10, 20, "Psychic")
-], dtype=list_dtype)
-
+# Define Pokémon data as an array of dictionaries with dtype=object
+pokemon_data = np.array([
+    {"name": "Jigglypuff", "power": 25, "health": 100, "poison": 10, "heal": 20, "type": "Normal"},
+    {"name": "Pikachu", "power": 25, "health": 100, "poison": 10, "heal": 20, "type": "Electric"},
+    {"name": "Eevee", "power": 25, "health": 100, "poison": 10, "heal": 20, "type": "Normal"},
+    {"name": "Charmander", "power": 30, "health": 100, "poison": 10, "heal": 20, "type": "Fire"},
+    {"name": "Squirtle", "power": 30, "health": 100, "poison": 10, "heal": 20, "type": "Water"},
+    {"name": "Bulbasaur", "power": 30, "health": 100, "poison": 10, "heal": 20, "type": "Grass"},
+    {"name": "Gengar", "power": 35, "health": 100, "poison": 10, "heal": 20, "type": "Poison"},
+    {"name": "Machamp", "power": 40, "health": 100, "poison": 10, "heal": 20, "type": "Fighting"},
+    {"name": "Snorlax", "power": 40, "health": 100, "poison": 10, "heal": 20, "type": "Normal"},
+    {"name": "Mewtwo", "power": 45, "health": 100, "poison": 10, "heal": 20, "type": "Psychic"}
+], dtype=object) 
 element = {
-    "Electric": [
-        ["Water"],                # Strong Against
-        []                        # Weak Against
-    ],
-    "Fire": [
-        ["Grass"],                # Strong Against
-        ["Water", "Fire"]         # Weak Against
-    ],
-    "Water": [
-        ["Fire"],                 # Strong Against
-        ["Electric", "Grass"]     # Weak Against
-    ],
-    "Normal": [
-        [],                       # Strong Against
-        []                        # Weak Against
-    ],
-    "Fighting": [
-        ["Normal"],               # Strong Against
-        ["Psychic"]               # Weak Against
-    ],
-    "Psychic": [
-        ["Fighting"],             # Strong Against
-        []                        # Weak Against
-    ],
-    "Grass": [
-        ["Water"],                # Strong Against
-        ["Fire"]                  # Weak Against
-    ]
+    "Electric": [["Water"], ["None"]],
+    "Fire": [["Grass"], ["Water", "Fire"]],
+    "Water": [["Fire"], ["Electric", "Grass"]],
+    "Normal": [["None"], ["None"]],
+    "Fighting": [["Normal"], ["Psychic"]],
+    "Psychic": [["Fighting"], ["None"]],
+    "Grass": [["Water"], ["Fire"]],
+    "Poison": [["Grass"], ["Poison", "Psychic"]],
 }
 
 p1 = []
 p2 = []
 battle = []
-battled_pokemon = set()  # Track Pokémon that have fought
-battle_counter = 0  # Initialize battle counter
-
-print("(Pokemon name, Power, Health, Poison, Potion, Element)")
-for i in range(len(pokemon_array)):
-    print(f"{i}.{pokemon_array[i]}")
+battled_pokemon = set()
+battle_counter = 0
+grant = 5
+fatigue = 2
 
 while True:
-    if len(p1) == 3 and len(p2) == 3:
-        # Check if all Pokémon have battled at least once
-        if len(battled_pokemon) < 6:  # Total of 6 unique Pokémon between p1 and p2
-            # Select random Pokémon for the battle
-            list_ = []
-            arnma = rm.randrange(3)  # Player 1 selects a random Pokémon
-            dmps = rm.randrange(3)   # Player 2 selects a random Pokémon
-            list_.append(p1[arnma])
-            list_.append(p2[dmps])
-            battle.append(list_)
+    action = input(" Welcome players!\n'png' to Play New Game(New character) or \n'pa' to Play Again(Same set of characters) or \n any character to exit \n type the letter of the operation you want to do: ").lower()
+    if action == "png":
+        pokemon_data = np.array([
+            {"name": "Jigglypuff", "power": 25, "health": 100, "poison": 10, "heal": 20, "type": "Normal"},
+            {"name": "Pikachu", "power": 25, "health": 100, "poison": 10, "heal": 20, "type": "Electric"},
+            {"name": "Eevee", "power": 25, "health": 100, "poison": 10, "heal": 20, "type": "Normal"},
+            {"name": "Charmander", "power": 30, "health": 100, "poison": 10, "heal": 20, "type": "Fire"},
+            {"name": "Squirtle", "power": 30, "health": 100, "poison": 10, "heal": 20, "type": "Water"},
+            {"name": "Bulbasaur", "power": 30, "health": 100, "poison": 10, "heal": 20, "type": "Grass"},
+            {"name": "Gengar", "power": 35, "health": 100, "poison": 10, "heal": 20, "type": "Poison"},
+            {"name": "Machamp", "power": 40, "health": 100, "poison": 10, "heal": 20, "type": "Fighting"},
+            {"name": "Snorlax", "power": 40, "health": 100, "poison": 10, "heal": 20, "type": "Normal"},
+            {"name": "Mewtwo", "power": 45, "health": 100, "poison": 10, "heal": 20, "type": "Psychic"}
+], dtype=object) 
+        p1 = []
+        p2 = []
+        battle = []
+        battled_pokemon = set()
+        battle_counter = 0
+        grant = 5
+        fatigue = 2
 
-            # Add the Pokémon to the set of battled Pokémon
-            battled_pokemon.add(p1[arnma][0])  # Add Player 1's Pokémon
-            battled_pokemon.add(p2[dmps][0])   # Add Player 2's Pokémon
+        print("\n(Pokemon name, Power, Health, Poison, Potion, Element)")
+        for i, pokemon in enumerate(pokemon_data, start=1):
+            print(f"{i}. {pokemon['name']}, {pokemon['power']}, {pokemon['health']}, {pokemon['poison']}, {pokemon['heal']}, {pokemon['type']}")
 
-            # Increment the battle counter
-            battle_counter += 1
+        while True:
+            if len(p1) == 3 and len(p2) == 3:
+                if len(battled_pokemon) < 6:
+                    player1_index = rm.choice([i for i in range(3) if p1[i]['name'] not in battled_pokemon])
+                    player2_index = rm.choice([i for i in range(3) if p2[i]['name'] not in battled_pokemon])
+                    battle.append([p1[player1_index], p2[player2_index]])
+                    battled_pokemon.add(p1[player1_index]["name"])  
+                    battled_pokemon.add(p2[player2_index]["name"])   
+                    battle_counter += 1
+                    print(f"\nBattle {battle_counter}: {p1[player1_index]['name']} vs {p2[player2_index]['name']}")
+                    
+                    if p1[player1_index]["type"] in element[p2[player2_index]["type"]][0]:
+                        print(f"{p1[player1_index]['name']} ({p1[player1_index]['type']}) is strong against {p2[player2_index]['name']} ({p2[player2_index]['type']})")
+                        p2[player2_index]["power"] -= p1[player1_index]["poison"]
+                        p1[player1_index]["poison"] = 0
+                        p1[player1_index]["power"] += p1[player1_index]["heal"]
+                        p1[player1_index]["heal"] = 0
+                        print(f"{p2[player2_index]['name']} ({p2[player2_index]['type']}) is weak against {p1[player1_index]['name']} ({p1[player1_index]['type']})")
+                        p1[player1_index]["power"] -= p2[player2_index]["poison"]
+                        p2[player2_index]["poison"] = 0
+                        p2[player2_index]["power"] += p2[player2_index]["heal"]
+                        p2[player2_index]["heal"] = 0
+                        if p1[player1_index]["power"] > p2[player2_index]["power"]:
+                            p2[player2_index]["health"] -= 10
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            p1[player1_index]["health"] += grant
+                            print(f"{p1[player1_index]['name']} wins!")
+                        elif p1[player1_index]["power"] < p2[player2_index]["power"]:
+                            p1[player1_index]["health"] -= 10
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            p2[player2_index]["health"] += grant
+                            print(f"{p2[player2_index]['name']} wins!")
+                        elif p1[player1_index]["power"] == p2[player2_index]["power"]:
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            print(f"Tie!")
+                    elif p1[player1_index]["type"] in element[p2[player2_index]["type"]][1]:
+                        print(f"{p2[player2_index]['name']} ({p2[player2_index]['type']}) is strong against {p1[player1_index]['name']} ({p1[player1_index]['type']})")
+                        p1[player1_index]["power"] -= p2[player2_index]["poison"]
+                        p2[player2_index]["poison"] = 0
+                        p2[player2_index]["power"] += p2[player2_index]["heal"]
+                        p2[player2_index]["heal"] = 0
+                        print(f"{p1[player1_index]['name']} ({p1[player1_index]['type']}) is weak against {p2[player2_index]['name']} ({p2[player2_index]['type']})")
+                        p2[player2_index]["power"] -= p1[player1_index]["poison"]
+                        p1[player1_index]["poison"] = 0
+                        p1[player1_index]["power"] += p1[player1_index]["heal"]
+                        p1[player1_index]["heal"] = 0
+                        if p1[player1_index]["power"] > p2[player2_index]["power"]:
+                            p2[player2_index]["health"] -= 10
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            p1[player1_index]["health"] += grant
+                            print(f"{p1[player1_index]['name']} wins!")
+                        elif p1[player1_index]["power"] < p2[player2_index]["power"]:
+                            p1[player1_index]["health"] -= 10
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            p2[player2_index]["health"] += grant
+                            print(f"{p2[player2_index]['name']} wins!")
+                        elif p1[player1_index]["power"] == p2[player2_index]["power"]:
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            print(f"Tie!")
+                    else:
+                        print(f"{p1[player1_index]['name']} ({p1[player1_index]['type']}) is neutral against {p2[player2_index]['name']} ({p2[player2_index]['type']})")
+                        actionp1 = input(f"Player 1, do you want to use 'poison' or 'potion' or 'pandp' for {p1[player1_index]['name']}? (Enter 'none' to skip): ").lower()
+                        actionp2 = input(f"Player 2, do you want to use 'poison' or 'potion' or 'pandp' for {p2[player2_index]['name']}? (Enter 'none' to skip): ").lower()
+                        
+                        if actionp1 == "poison":
+                            p2[player2_index]["power"] -= p1[player1_index]["poison"]
+                            p1[player1_index]["poison"] = 0
+                        elif actionp1 == "potion":
+                            p1[player1_index]["power"] += p1[player1_index]["heal"]
+                            p1[player1_index]["heal"] = 0
+                        elif actionp1 == "pandp":
+                            p2[player2_index]["power"] -= p1[player1_index]["poison"]
+                            p1[player1_index]["poison"] = 0
+                            p1[player1_index]["power"] += p1[player1_index]["heal"]
+                            p1[player1_index]["heal"] = 0
+                        else:
+                            print("Wrong input!")
+                        if actionp2 == "poison":
+                            p1[player1_index]["power"] -= p2[player2_index]["poison"]
+                            p2[player2_index]["poison"] = 0
+                        elif actionp2 == "potion":
+                            p2[player2_index]["power"] += p2[player2_index]["heal"]
+                            p2[player2_index]["heal"] = 0
+                        elif actionp2 == "pandp":
+                            p1[player1_index]["power"] -= p2[player2_index]["poison"]
+                            p2[player2_index]["poison"] = 0
+                            p2[player2_index]["power"] += p2[player2_index]["heal"]
+                            p2[player2_index]["heal"] = 0
+                        else:
+                            print("Wrong input!")
+                        if p1[player1_index]["power"] > p2[player2_index]["power"]:
+                            p2[player2_index]["health"] -= 10
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            p1[player1_index]["health"] += grant
+                            print(f"{p1[player1_index]['name']} wins!")
+                        elif p1[player1_index]["power"] < p2[player2_index]["power"]:
+                            p1[player1_index]["health"] -= 10
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            p2[player2_index]["health"] += grant
+                            print(f"{p2[player2_index]['name']} wins!")
+                        elif p1[player1_index]["power"] == p2[player2_index]["power"]:
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            print(f"Tie!")
+                            
+                    print(f"Battle log:")
+                    print(tabulate(battle, headers=["Player 1 Pokémon", "Player 2 Pokémon"], tablefmt="grid"))
 
-            # Print the battle result
-            print(f"Battle {battle_counter}: {p1[arnma][0]} vs {p2[dmps][0]}")
-            print(f"Current battle log:")
-            print(tabulate(battle, headers=["Player 1 Pokémon", "Player 2 Pokémon"], tablefmt="grid"))
+                else:
+                    print("All Pokémon have participated in a battle!")
+                    break 
 
-        else:
-            # End the loop when all Pokémon have been in a battle
-            print("All Pokémon have participated in a battle!")
-            break  # Exit the loop when all Pokémon have battled at least once
+            elif len(p1) != 3:
+                # selection = int(input(f"Choose your Pokémon, Player 1: ")) - 1
+                selection = rm.choice([i for i in range(len(pokemon_data))])
+                if selection in [0, 1, 2]:
+                    p1.append(pokemon_data[selection])
+                    pokemon_data = np.delete(pokemon_data, selection)
+                    print(f"\nPlayer 1 selected: {[p['name'] for p in p1]}\n")
+                    for i, pokemon in enumerate(pokemon_data, start=1):
+                        print(f"{i}. {pokemon['name']}, {pokemon['power']}, {pokemon['health']}, {pokemon['poison']}, {pokemon['heal']}, {pokemon['type']}")
 
-    elif len(p1) != 3:
-        # Player 1 selects a Pokémon (simulated as selection = 0 for now)
-        selection = 0  # Change this to an actual input if needed
-        if str(selection).isdigit() and int(selection) in range(len(pokemon_array)):
-            p1.append(pokemon_array[int(selection)].tolist())
-            pokemon_array = np.delete(pokemon_array, int(selection))
-            print("Player 1 selected:", p1)
-            for i in range(len(pokemon_array)):
-                print(f"{i}.{pokemon_array[i]}")
-        else:
-            print("Invalid input, try again.")
+            elif len(p2) != 3:
+                # selection = int(input(f"Choose your Pokémon, Player 2: ")) - 1
+                selection = rm.choice([i for i in range(len(pokemon_data))])
+                if selection in [0, 1, 2]:
+                    p2.append(pokemon_data[selection])
+                    pokemon_data = np.delete(pokemon_data, selection)
+                    print(f"\nPlayer 2 selected: {[p['name'] for p in p2]}\n")
+                    for i, pokemon in enumerate(pokemon_data, start=1):
+                        print(f"{i}. {pokemon['name']}, {pokemon['power']}, {pokemon['health']}, {pokemon['poison']}, {pokemon['heal']}, {pokemon['type']}")
 
-    elif len(p2) != 3:
-        # Player 2 selects a Pokémon (simulated as selection = 0 for now)
-        selection = 0  # Change this to an actual input if needed
-        if str(selection).isdigit() and int(selection) in range(len(pokemon_array)):
-            p2.append(pokemon_array[int(selection)].tolist())
-            pokemon_array = np.delete(pokemon_array, int(selection))
-            print("Player 2 selected:", p2)
-            for i in range(len(pokemon_array)):
-                print(f"{i}.{pokemon_array[i]}")
-        else:
-            print("Invalid input, try again.")
+        print("\nBattle Summary:")
+        print(f"Total battles fought: {battle_counter}")
+    elif action == "pa":
+        battle_counter = 0
+        battle = []
+        battled_pokemon = set()
+        while True:
+            if len(p1) == 3 and len(p2) == 3:
+                if len(battled_pokemon) < 6:
+                    player1_index = rm.choice([i for i in range(3) if p1[i]['name'] not in battled_pokemon])
+                    player2_index = rm.choice([i for i in range(3) if p2[i]['name'] not in battled_pokemon])
+                    battle.append([p1[player1_index], p2[player2_index]])
+                    battled_pokemon.add(p1[player1_index]["name"])  
+                    battled_pokemon.add(p2[player2_index]["name"])   
+                    battle_counter += 1
+                    print(f"\nBattle {battle_counter}: {p1[player1_index]['name']} vs {p2[player2_index]['name']}")
+                    
+                    if p1[player1_index]["type"] in element[p2[player2_index]["type"]][0]:
+                        print(f"{p1[player1_index]['name']} ({p1[player1_index]['type']}) is strong against {p2[player2_index]['name']} ({p2[player2_index]['type']})")
+                        p2[player2_index]["power"] -= p1[player1_index]["poison"]
+                        p1[player1_index]["poison"] = 0
+                        p1[player1_index]["power"] += p1[player1_index]["heal"]
+                        p1[player1_index]["heal"] = 0
+                        print(f"{p2[player2_index]['name']} ({p2[player2_index]['type']}) is weak against {p1[player1_index]['name']} ({p1[player1_index]['type']})")
+                        p1[player1_index]["power"] -= p2[player2_index]["poison"]
+                        p2[player2_index]["poison"] = 0
+                        p2[player2_index]["power"] += p2[player2_index]["heal"]
+                        p2[player2_index]["heal"] = 0
+                        if p1[player1_index]["power"] > p2[player2_index]["power"]:
+                            p2[player2_index]["health"] -= 10
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            p1[player1_index]["health"] += grant
+                            print(f"{p1[player1_index]['name']} wins!")
+                        elif p1[player1_index]["power"] < p2[player2_index]["power"]:
+                            p1[player1_index]["health"] -= 10
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            p2[player2_index]["health"] += grant
+                            print(f"{p2[player2_index]['name']} wins!")
+                        elif p1[player1_index]["power"] == p2[player2_index]["power"]:
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            print(f"Tie!")
+                    elif p1[player1_index]["type"] in element[p2[player2_index]["type"]][1]:
+                        print(f"{p2[player2_index]['name']} ({p2[player2_index]['type']}) is strong against {p1[player1_index]['name']} ({p1[player1_index]['type']})")
+                        p1[player1_index]["power"] -= p2[player2_index]["poison"]
+                        p2[player2_index]["poison"] = 0
+                        p2[player2_index]["power"] += p2[player2_index]["heal"]
+                        p2[player2_index]["heal"] = 0
+                        print(f"{p1[player1_index]['name']} ({p1[player1_index]['type']}) is weak against {p2[player2_index]['name']} ({p2[player2_index]['type']})")
+                        p2[player2_index]["power"] -= p1[player1_index]["poison"]
+                        p1[player1_index]["poison"] = 0
+                        p1[player1_index]["power"] += p1[player1_index]["heal"]
+                        p1[player1_index]["heal"] = 0
+                        if p1[player1_index]["power"] > p2[player2_index]["power"]:
+                            p2[player2_index]["health"] -= 10
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            p1[player1_index]["health"] += grant
+                            print(f"{p1[player1_index]['name']} wins!")
+                        elif p1[player1_index]["power"] < p2[player2_index]["power"]:
+                            p1[player1_index]["health"] -= 10
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            p2[player2_index]["health"] += grant
+                            print(f"{p2[player2_index]['name']} wins!")
+                        elif p1[player1_index]["power"] == p2[player2_index]["power"]:
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            print(f"Tie!")
+                    else:
+                        print(f"{p1[player1_index]['name']} ({p1[player1_index]['type']}) is neutral against {p2[player2_index]['name']} ({p2[player2_index]['type']})")
+                        actionp1 = input(f"Player 1, do you want to use 'poison' or 'potion' or 'pandp' for {p1[player1_index]['name']}? (Enter 'none' to skip): ").lower()
+                        actionp2 = input(f"Player 2, do you want to use 'poison' or 'potion' or 'pandp' for {p2[player2_index]['name']}? (Enter 'none' to skip): ").lower()
+                        
+                        if actionp1 == "poison":
+                            p2[player2_index]["power"] -= p1[player1_index]["poison"]
+                            p1[player1_index]["poison"] = 0
+                        elif actionp1 == "potion":
+                            p1[player1_index]["power"] += p1[player1_index]["heal"]
+                            p1[player1_index]["heal"] = 0
+                        elif actionp1 == "pandp":
+                            p2[player2_index]["power"] -= p1[player1_index]["poison"]
+                            p1[player1_index]["poison"] = 0
+                            p1[player1_index]["power"] += p1[player1_index]["heal"]
+                            p1[player1_index]["heal"] = 0
+                        else:
+                            print("Wrong input!")
+                        if actionp2 == "poison":
+                            p1[player1_index]["power"] -= p2[player2_index]["poison"]
+                            p2[player2_index]["poison"] = 0
+                        elif actionp2 == "potion":
+                            p2[player2_index]["power"] += p2[player2_index]["heal"]
+                            p2[player2_index]["heal"] = 0
+                        elif actionp2 == "pandp":
+                            p1[player1_index]["power"] -= p2[player2_index]["poison"]
+                            p2[player2_index]["poison"] = 0
+                            p2[player2_index]["power"] += p2[player2_index]["heal"]
+                            p2[player2_index]["heal"] = 0
+                        else:
+                            print("Wrong input!")
+                        if p1[player1_index]["power"] > p2[player2_index]["power"]:
+                            p2[player2_index]["health"] -= 10
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            p1[player1_index]["health"] += grant
+                            print(f"{p1[player1_index]['name']} wins!")
+                        elif p1[player1_index]["power"] < p2[player2_index]["power"]:
+                            p1[player1_index]["health"] -= 10
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            p2[player2_index]["health"] += grant
+                            print(f"{p2[player2_index]['name']} wins!")
+                        elif p1[player1_index]["power"] == p2[player2_index]["power"]:
+                            p1[player1_index]["health"] -= fatigue
+                            p2[player2_index]["health"] -= fatigue
+                            print(f"Tie!")
+                            
+                    print(f"Battle log:")
+                    print(tabulate(battle, headers=["Player 1 Pokémon", "Player 2 Pokémon"], tablefmt="grid"))
 
-# Print battle summary after the game ends
-print("\nBattle Summary:")
-print(f"Total battles fought: {battle_counter}")
+                else:
+                    print("All Pokémon have participated in a battle!")
+                    break 
+
+            elif len(p1) != 3:
+                # selection = int(input(f"Choose your Pokémon, Player 1: ")) - 1
+                selection = rm.choice([i for i in range(len(pokemon_data))])
+                if selection in [0, 1, 2]:
+                    p1.append(pokemon_data[selection])
+                    pokemon_data = np.delete(pokemon_data, selection)
+                    print(f"\nPlayer 1 selected: {[p['name'] for p in p1]}\n")
+                    for i, pokemon in enumerate(pokemon_data, start=1):
+                        print(f"{i}. {pokemon['name']}, {pokemon['power']}, {pokemon['health']}, {pokemon['poison']}, {pokemon['heal']}, {pokemon['type']}")
+
+            elif len(p2) != 3:
+                # selection = int(input(f"Choose your Pokémon, Player 2: ")) - 1
+                selection = rm.choice([i for i in range(len(pokemon_data))])
+                if selection in [0, 1, 2]:
+                    p2.append(pokemon_data[selection])
+                    pokemon_data = np.delete(pokemon_data, selection)
+                    print(f"\nPlayer 2 selected: {[p['name'] for p in p2]}\n")
+                    for i, pokemon in enumerate(pokemon_data, start=1):
+                        print(f"{i}. {pokemon['name']}, {pokemon['power']}, {pokemon['health']}, {pokemon['poison']}, {pokemon['heal']}, {pokemon['type']}")
+                    
+        print("\nBattle Summary:")
+        print(f"Total battles fought: {battle_counter}")
+    else:
+        print(" Thankyou for playing!")
+        exit()
