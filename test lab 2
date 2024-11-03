@@ -258,23 +258,6 @@ def display_battle_log(game_state):
     
     print(tabulate(table_data, headers=headers, tablefmt="grid"))
 
-def check_element_advantage(p1_pokemon, p2_pokemon, element_types):
-    p1_type = p1_pokemon['type']
-    p2_type = p2_pokemon['type']
-    
-    # Silently apply advantages/disadvantages
-    if p2_type in element_types[p1_type][0]:
-        p1_pokemon['power'] += 10
-    
-    if p1_type in element_types[p2_type][0]:
-        p2_pokemon['power'] += 10
-    
-    if p2_type in element_types[p1_type][1]:
-        p1_pokemon['power'] -= 10
-    
-    if p1_type in element_types[p2_type][1]:
-        p2_pokemon['power'] -= 10
-
 def conduct_battle_round(game_state, element):
     available_p1 = [p for p in game_state['p1'] if p['name'] not in game_state['battled_pokemon']]
     available_p2 = [p for p in game_state['p2'] if p['name'] not in game_state['battled_pokemon']]
@@ -284,9 +267,6 @@ def conduct_battle_round(game_state, element):
         p2_pokemon = available_p2[0]
         
         print(f"\nBattle {game_state['battle_counter'] + 1}: {p1_pokemon['name']} vs {p2_pokemon['name']}")
-        
-        # Silently apply element advantages
-        check_element_advantage(p1_pokemon, p2_pokemon, element)
         
         # Process player actions
         processactions(p1_pokemon, p2_pokemon)
@@ -397,90 +377,121 @@ def playgame(gamestate, element, newgame=False):
                 gamestate['p2'], 
                 2
             )
-    
-    # Reset battle stats if needed
     gamestate = resetbattle(gamestate)
-    
-    # Conduct battles until game is over
     battle_continues = True
     while battle_continues:
         battle_continues = conduct_battle_round(gamestate, element)
-        
-        # Check if any Pokemon has fainted
         for pokemon in gamestate['p1'] + gamestate['p2']:
             if pokemon['health'] <= 0:
                 print(f"\n{pokemon['name']} has fainted! Game Over!")
                 battle_continues = False
                 break
-    
-    # Display final battle summary
     display_battle_summary(gamestate)
-    
     return gamestate
-
 def gamehistory():
     return {
         'games_played': 0,
-        'history': [],  # List to store all games
-        'current_game': None  # Track current game state
+        'history': [],
+        'current_game': None
     }
-
 def addtohistory(history, game_state):
     history['games_played'] += 1
-    
-    # Calculate final health totals
     p1_health = sum(p['health'] for p in game_state['p1'])
     p2_health = sum(p['health'] for p in game_state['p2'])
-    
-    # Create game data entry
     game_data = {
         'game_number': history['games_played'],
         'p1_health': p1_health,
         'p2_health': p2_health,
-        'battles': game_state['battle'].copy(),  # Store battle data
+        'p1_team': [{'name': p['name'], 'type': p['type']} for p in game_state['p1']],
+        'p2_team': [{'name': p['name'], 'type': p['type']} for p in game_state['p2']],
+        'battles': game_state['battle'].copy(),
         'status': 'Player 1 won' if p1_health > p2_health else 'Player 2 won' if p2_health > p1_health else 'Draw'
     }
-    
-    # Add to history list (append, don't overwrite)
     history['history'].append(game_data)
     history['current_game'] = game_data
-    
     return history
-
 def displayhistory(history):
     print("\n\n=== OVERALL GAME HISTORY ===")
-    headers = ["Game", "Player 1 Health", "Player 2 Health", "Status"]
+    headers = ["Game", "Team 1", "Team 2", "P1 Health", "P2 Health", "Status"]
     table_data = []
-    
-    # Show all games in history
     for game in history['history']:
+        p1_team = ", ".join([p['name'] for p in game['p1_team']])
+        p2_team = ", ".join([p['name'] for p in game['p2_team']])
         table_data.append([
             f"Game {game['game_number']}", 
+            p1_team,
+            p2_team,
             game['p1_health'], 
             game['p2_health'], 
             game['status']
         ])
-    
     print(tabulate(table_data, headers=headers, tablefmt="grid"))
-    print("==========================\n")
-
+    print("\n=== TEAM MATCHUP STATISTICS ===")
+    matchups = {}
+    for game in history['history']:
+        p1_team = tuple(sorted([p['name'] for p in game['p1_team']]))
+        p2_team = tuple(sorted([p['name'] for p in game['p2_team']]))
+        matchup_key = (p1_team, p2_team)
+        if matchup_key not in matchups:
+            matchups[matchup_key] = {
+                'total': 0,
+                'p1_wins': 0,
+                'p2_wins': 0,
+                'draws': 0
+            }
+        matchups[matchup_key]['total'] += 1
+        if game['status'] == 'Player 1 won':
+            matchups[matchup_key]['p1_wins'] += 1
+        elif game['status'] == 'Player 2 won':
+            matchups[matchup_key]['p2_wins'] += 1
+        else:
+            matchups[matchup_key]['draws'] += 1
+    headers = ["Team 1", "Team 2", "Total Games", "P1 Wins", "P2 Wins", "Draws"]
+    table_data = []
+    for (p1_team, p2_team), stats in matchups.items():
+        table_data.append([
+            ", ".join(p1_team),
+            ", ".join(p2_team),
+            stats['total'],
+            stats['p1_wins'],
+            stats['p2_wins'],
+            stats['draws']
+        ])
+    print(tabulate(table_data, headers=headers, tablefmt="grid"))
 def mainloop():
     gamestate = resetgame()
     element = elementtypes()
-    history = gamehistory()  # Initialize history once
-    
+    history = gamehistory()
     while True:
-        action = input(" Welcome players!\n'png' to Play New Game(New character) or \n'pa' to Play Again(Same set of characters) or \n any character to exit \n type the letter of the operation you want to do: ").lower()
-        
+        any_fainted = False
+        fainted_pokemon = []
+        if len(gamestate['p1']) > 0 and len(gamestate['p2']) > 0:
+            for pokemon in gamestate['p1'] + gamestate['p2']:
+                if pokemon['health'] <= 0:
+                    any_fainted = True
+                    fainted_pokemon.append(pokemon['name'])
+        if any_fainted:
+            displayhistory(history)
+            print("\nA Pokemon have fainted:", ", ".join(fainted_pokemon))
+            print("Only 'png' (New Game) is available!")
+            print("\n'png' to Play New Game(New character) or")
+            print("any character to exit")
+        else:
+            print("\n'png' to Play New Game(New character) or")
+            print("'pa' to Play Again(Same set of characters) or")
+            print("any character to exit")
+        action = input("type the letter of the operation you want to do: ").lower()
+        if any_fainted and action == "pa":
+            print("\nCannot continue with fainted Pokemon. Please start a new game.")
+            continue
         if action == "pa" and len(gamestate['p1']) == 0:
             print("\nNo Pokemon selected. Starting new game instead...")
             action = "png"
-        
         if action == "png":
             gamestate = resetgame()  # Reset game state
             gamestate = playgame(gamestate, element, newgame=True)
             history = addtohistory(history, gamestate)  # Add to history
-        elif action == "pa":
+        elif action == "pa" and not any_fainted:
             gamestate = resetbattle(gamestate)  # Only reset battle stats
             gamestate = playgame(gamestate, element, newgame=False)
             history = addtohistory(history, gamestate)  # Add to history
@@ -490,5 +501,4 @@ def mainloop():
                 displayhistory(history)  # Show complete history
             break
     return
-
 mainloop()
