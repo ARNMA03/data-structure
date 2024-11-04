@@ -70,7 +70,7 @@ def elementtypes():
         "Poison": [["Grass"], ["Poison", "Psychic"]]
     }
 
-def resetgame():
+def resetgame(team_size=3):
     return {
         'pokemon_data': pokemon_data(),
         'p1': [],
@@ -79,7 +79,8 @@ def resetgame():
         'battled_pokemon': set(),
         'battle_counter': 0,
         'grant': 5,
-        'fatigue': 2
+        'fatigue': 2,
+        'team_size': team_size
     }
 
 def pokemonlist(pokemon_data):
@@ -87,50 +88,35 @@ def pokemonlist(pokemon_data):
     for i, pokemon in enumerate(pokemon_data, start=1):
         print(f"{i}. {pokemon['name']}, {pokemon['power']}, {pokemon['health']}, {pokemon['poison']}, {pokemon['heal']}, {pokemon['type']}")
 
-def pokemonselection(pokemon_data, player_pokemon, player_num, show_list=True):
-    while True:
-        try:
-            # Always show the current list of available Pokemon
-            pokemonlist(pokemon_data)
-            
-            # Get player input
-            selection = input(f"Choose your Pokémon, Player {player_num} (1-{len(pokemon_data)}): ")
-            
-            # Check if input is a number
-            if not selection.isdigit():
-                print("\nError: Please enter a number!")
-                continue
-                
-            selection = int(selection) - 1
-            
-            # Check if selection is within valid range
-            if selection < 0 or selection >= len(pokemon_data):
-                print(f"\nError: Please choose a number between 1 and {len(pokemon_data)}!")
-                continue
-            
-            # Valid selection - add Pokemon to player's team
-            player_pokemon.append(pokemon_data[selection])
-            pokemon_data = np.delete(pokemon_data, selection)
-            
-            print(f"\nPlayer {player_num} selected: {[p['name'] for p in player_pokemon]}\n")
+def pokemonselection(pokemon_data, player_pokemon, player_name, team_size):
+    pokemonlist(pokemon_data)
+    
+    max_pokemon = len(pokemon_data)
+    remaining_slots = team_size - len(player_pokemon)
+    
+    try:
+        choice = int(input(f"Choose your Pokémon, {player_name} (1-{max_pokemon}): "))
+        
+        if 1 <= choice <= max_pokemon:
+            selected_pokemon = pokemon_data[choice - 1].copy()
+            pokemon_data = np.delete(pokemon_data, choice - 1)
+            player_pokemon.append(selected_pokemon)
+            print(f"\n{player_name} selected: {[p['name'] for p in player_pokemon]}")
+            print(f"Remaining slots: {remaining_slots - 1}\n")
             
             return pokemon_data
-            
-        except ValueError:
-            print("\nError: Invalid input! Please enter a number.")
-        except IndexError:
-            print("\nError: Invalid selection! Please choose from the available Pokemon.")
-        except Exception as e:
-            print(f"\nAn unexpected error occurred: {str(e)}")
-            print("Please try again.")
+        else:
+            print(f"\nError: Please choose a number between 1 and {max_pokemon}!")
+            return pokemonselection(pokemon_data, player_pokemon, player_name, team_size)
+    except ValueError:
+        print("\nError: Please enter a number!")
+        return pokemonselection(pokemon_data, player_pokemon, player_name, team_size)
 
-def processactions(p1_pokemon, p2_pokemon):
-    # Show current stats before asking for actions
+def processactions(p1_pokemon, p2_pokemon, name1, name2):
     print(f"\nCurrent Stats:")
-    print(f"P1 {p1_pokemon['name']}: Power={p1_pokemon['power']}, Poison={p1_pokemon['poison']}, Heal={p1_pokemon['heal']}")
-    print(f"P2 {p2_pokemon['name']}: Power={p2_pokemon['power']}, Poison={p2_pokemon['poison']}, Heal={p2_pokemon['heal']}")
+    print(f"{name1}'s {p1_pokemon['name']}: Power={p1_pokemon['power']}, Poison={p1_pokemon['poison']}, Heal={p1_pokemon['heal']}")
+    print(f"{name2}'s {p2_pokemon['name']}: Power={p2_pokemon['power']}, Poison={p2_pokemon['poison']}, Heal={p2_pokemon['heal']}")
     
-    # Check if actions would be meaningful
     p1_can_act = p1_pokemon['poison'] > 0 or p1_pokemon['heal'] > 0
     p2_can_act = p2_pokemon['poison'] > 0 or p2_pokemon['heal'] > 0
     
@@ -139,67 +125,65 @@ def processactions(p1_pokemon, p2_pokemon):
         return
         
     if p1_can_act:
-        actionp1 = input(f"Player 1, do you want to use 'poison' or 'potion' or 'pandp' for {p1_pokemon['name']}? (Enter 'none' to skip): ").lower()
+        actionp1 = input(f"{name1}, do you want to use 'poison' or 'potion' or 'pandp' for {p1_pokemon['name']}? (Enter 'none' to skip): ").lower()
         if actionp1 == "poison" and p1_pokemon['poison'] > 0:
             p2_pokemon["power"] -= p1_pokemon["poison"]
             p1_pokemon["poison"] = 0
-            print(f"P1 used poison! P2's power reduced to {p2_pokemon['power']}")
+            print(f"{name1} used poison! {name2}'s {p2_pokemon['name']}'s power reduced to {p2_pokemon['power']}")
         elif actionp1 == "potion" and p1_pokemon['heal'] > 0:
             p1_pokemon["power"] += p1_pokemon["heal"]
             p1_pokemon["heal"] = 0
-            print(f"P1 used potion! P1's power increased to {p1_pokemon['power']}")
+            print(f"{name1} used potion! {p1_pokemon['name']}'s power increased to {p1_pokemon['power']}")
         elif actionp1 == "pandp" and p1_pokemon['poison'] > 0 and p1_pokemon['heal'] > 0:
             p2_pokemon["power"] -= p1_pokemon["poison"]
             p1_pokemon["poison"] = 0
             p1_pokemon["power"] += p1_pokemon["heal"]
             p1_pokemon["heal"] = 0
-            print(f"P1 used both! P1's power = {p1_pokemon['power']}, P2's power = {p2_pokemon['power']}")
+            print(f"{name1} used both! {p1_pokemon['name']}'s power = {p1_pokemon['power']}, {name2}'s {p2_pokemon['name']}'s power = {p2_pokemon['power']}")
         elif actionp1 == "none":
-            print("P1 skipped their action")
+            print(f"{name1} skipped their action")
         else:
             print("Invalid input or no items available!")
     else:
-        print(f"P1 {p1_pokemon['name']} has no items left to use!")
+        print(f"{name1}'s {p1_pokemon['name']} has no items left to use!")
     
     if p2_can_act:
-        actionp2 = input(f"Player 2, do you want to use 'poison' or 'potion' or 'pandp' for {p2_pokemon['name']}? (Enter 'none' to skip): ").lower()
+        actionp2 = input(f"{name2}, do you want to use 'poison' or 'potion' or 'pandp' for {p2_pokemon['name']}? (Enter 'none' to skip): ").lower()
         if actionp2 == "poison" and p2_pokemon['poison'] > 0:
             p1_pokemon["power"] -= p2_pokemon["poison"]
             p2_pokemon["poison"] = 0
-            print(f"P2 used poison! P1's power reduced to {p1_pokemon['power']}")
+            print(f"{name2} used poison! {name1}'s {p1_pokemon['name']}'s power reduced to {p1_pokemon['power']}")
         elif actionp2 == "potion" and p2_pokemon['heal'] > 0:
             p2_pokemon["power"] += p2_pokemon["heal"]
             p2_pokemon["heal"] = 0
-            print(f"P2 used potion! P2's power increased to {p2_pokemon['power']}")
+            print(f"{name2} used potion! {p2_pokemon['name']}'s power increased to {p2_pokemon['power']}")
         elif actionp2 == "pandp" and p2_pokemon['poison'] > 0 and p2_pokemon['heal'] > 0:
             p1_pokemon["power"] -= p2_pokemon["poison"]
             p2_pokemon["poison"] = 0
             p2_pokemon["power"] += p2_pokemon["heal"]
             p2_pokemon["heal"] = 0
-            print(f"P2 used both! P2's power = {p2_pokemon['power']}, P1's power = {p1_pokemon['power']}")
+            print(f"{name2} used both! {p2_pokemon['name']}'s power = {p2_pokemon['power']}, {name1}'s {p1_pokemon['name']}'s power = {p1_pokemon['power']}")
         elif actionp2 == "none":
-            print("P2 skipped their action")
+            print(f"{name2} skipped their action")
         else:
             print("Invalid input or no items available!")
     else:
-        print(f"P2 {p2_pokemon['name']} has no items left to use!")
+        print(f"{name2}'s {p2_pokemon['name']} has no items left to use!")
     
     print("\nFinal Stats after actions:")
-    print(f"P1 {p1_pokemon['name']}: Power={p1_pokemon['power']}, Poison={p1_pokemon['poison']}, Heal={p1_pokemon['heal']}")
-    print(f"P2 {p2_pokemon['name']}: Power={p2_pokemon['power']}, Poison={p2_pokemon['poison']}, Heal={p2_pokemon['heal']}")
+    print(f"{name1}'s {p1_pokemon['name']}: Power={p1_pokemon['power']}, Poison={p1_pokemon['poison']}, Heal={p1_pokemon['heal']}")
+    print(f"{name2}'s {p2_pokemon['name']}: Power={p2_pokemon['power']}, Poison={p2_pokemon['poison']}, Heal={p2_pokemon['heal']}")
 
 def calculate_battle_outcome(p1_pokemon, p2_pokemon, grant, fatigue):
     print(f"\nBefore battle:")
     print(f"{p1_pokemon['name']}: HP={p1_pokemon['health']}, Power={p1_pokemon['power']}")
     print(f"{p2_pokemon['name']}: HP={p2_pokemon['health']}, Power={p2_pokemon['power']}")
     
-    # Calculate battle outcome
     if p1_pokemon["power"] > p2_pokemon["power"]:
-        # P1 wins: P2 takes damage, P1 gets grant, both get fatigue
-        p2_pokemon["health"] -= 10  # Damage
-        p1_pokemon["health"] += grant  # Winner bonus
-        p1_pokemon["health"] -= fatigue  # Fatigue
-        p2_pokemon["health"] -= fatigue  # Fatigue
+        p2_pokemon["health"] -= 10
+        p1_pokemon["health"] += grant
+        p1_pokemon["health"] -= fatigue
+        p2_pokemon["health"] -= fatigue
         
         print(f"\nAfter battle:")
         print(f"{p1_pokemon['name']} wins!")
@@ -213,11 +197,10 @@ def calculate_battle_outcome(p1_pokemon, p2_pokemon, grant, fatigue):
         return f"{p1_pokemon['name']} wins!"
         
     elif p1_pokemon["power"] < p2_pokemon["power"]:
-        # P2 wins: P1 takes damage, P2 gets grant, both get fatigue
-        p1_pokemon["health"] -= 10  # Damage
-        p2_pokemon["health"] += grant  # Winner bonus
-        p1_pokemon["health"] -= fatigue  # Fatigue
-        p2_pokemon["health"] -= fatigue  # Fatigue
+        p1_pokemon["health"] -= 10
+        p2_pokemon["health"] += grant
+        p1_pokemon["health"] -= fatigue
+        p2_pokemon["health"] -= fatigue
         
         print(f"\nAfter battle:")
         print(f"{p2_pokemon['name']} wins!")
@@ -231,7 +214,6 @@ def calculate_battle_outcome(p1_pokemon, p2_pokemon, grant, fatigue):
         return f"{p2_pokemon['name']} wins!"
         
     else:
-        # Tie: both get fatigue only
         p1_pokemon["health"] -= fatigue
         p2_pokemon["health"] -= fatigue
         
@@ -266,21 +248,17 @@ def conduct_battle_round(game_state, element):
         p1_pokemon = available_p1[0]
         p2_pokemon = available_p2[0]
         
-        print(f"\nBattle {game_state['battle_counter'] + 1}: {p1_pokemon['name']} vs {p2_pokemon['name']}")
+        print(f"\nBattle {game_state['battle_counter'] + 1}: {game_state['player_names'][1]}'s {p1_pokemon['name']} vs {game_state['player_names'][2]}'s {p2_pokemon['name']}")
         
-        # Process player actions
-        processactions(p1_pokemon, p2_pokemon)
+        processactions(p1_pokemon, p2_pokemon, game_state['player_names'][1], game_state['player_names'][2])
         
-        # Calculate battle outcome
         battle_result = calculate_battle_outcome(p1_pokemon, p2_pokemon, game_state['grant'], game_state['fatigue'])
         
-        # Check if any Pokemon fainted during battle
         if p1_pokemon['health'] <= 0 or p2_pokemon['health'] <= 0:
             fainted = p1_pokemon['name'] if p1_pokemon['health'] <= 0 else p2_pokemon['name']
             winner = p2_pokemon['name'] if p1_pokemon['health'] <= 0 else p1_pokemon['name']
             battle_result = f"{fainted} fainted! {winner} wins!"
         
-        # Create battle entry
         battle_entry = {
             'round': game_state['battle_counter'] + 1,
             'p1_name': p1_pokemon['name'],
@@ -296,15 +274,13 @@ def conduct_battle_round(game_state, element):
             'status': battle_result
         }
         
-        # Add battle to history
         game_state['battle'].append(battle_entry)
         game_state['battled_pokemon'].add(p1_pokemon['name'])
         game_state['battled_pokemon'].add(p2_pokemon['name'])
         game_state['battle_counter'] += 1
         
-        # Display battle log
         print("\nBattle Log:")
-        headers = ["Round", "Player 1", "Player 2", "Result"]
+        headers = ["Round", game_state['player_names'][1], game_state['player_names'][2], "Result"]
         table_data = [[
             f"Battle {b['round']}", 
             f"{b['p1_name']} (HP:{b['p1_health']}, PWR:{b['p1_power']}, PSN:{b['p1_poison']}, HEL:{b['p1_heal']})", 
@@ -314,7 +290,6 @@ def conduct_battle_round(game_state, element):
         print(tabulate(table_data, headers=headers, tablefmt="grid"))
         print()
         
-        # End game if a Pokemon has fainted
         if p1_pokemon['health'] <= 0 or p2_pokemon['health'] <= 0:
             print(f"\n{battle_result}")
             print("Game ended due to Pokemon fainting!")
@@ -362,38 +337,79 @@ def display_battle_summary(game_state):
         print(f"Round {battle['round']}: {battle['p1_name']} vs {battle['p2_name']} - {battle['status']}")
     print("==================\n")
 
-def playgame(gamestate, element, newgame=False):
+def coin_toss():
+    print("\n=== PLAYER NAMES ===")
+    p1_name = input("Enter Player 1's name: ").strip()
+    p2_name = input("Enter Player 2's name: ").strip()
+    
+    print("\n=== COIN TOSS ===")
+    call = input(f"{p1_name}, call Heads or Tails: ").capitalize()
+    while call not in ['Heads', 'Tails']:
+        print("Please enter either 'Heads' or 'Tails'!")
+        call = input(f"{p1_name}, call Heads or Tails: ").capitalize()
+    
+    print(f"\n{p1_name} called: {call}")
+    input(f"Press Enter to flip the coin...")
+    
+    result = rm.choice(['Heads', 'Tails'])
+    print(f"\nThe coin shows: {result}!")
+    
+    if call == result:
+        first_player = 1
+        first_player_name = p1_name
+        print(f"\n{p1_name} called it right!")
+    else:
+        first_player = 2
+        first_player_name = p2_name
+        print(f"\n{p1_name} called it wrong!")
+    
+    print(f"{first_player_name} will pick first!")
+    
+    return first_player, p1_name, p2_name
+
+def playgame(gamestate, element, newgame=True):
     if newgame:
-        # Select Pokemon for both players
-        while len(gamestate['p1']) < 3:
+        print(f"\nEach player will select {gamestate['team_size']} Pokemon!")
+        
+        first_player, name1, name2 = coin_toss()
+        
+        gamestate['player_names'] = {1: name1, 2: name2}
+        
+        for i in range(gamestate['team_size'] * 2):
+            current_player = first_player if i % 2 == 0 else (3 - first_player)
+            current_team = gamestate['p1'] if current_player == 1 else gamestate['p2']
+            current_name = name1 if current_player == 1 else name2
+            
+            print(f"\n{current_name}, select your Pokemon! ({len(current_team)}/{gamestate['team_size']})")
             gamestate['pokemon_data'] = pokemonselection(
                 gamestate['pokemon_data'], 
-                gamestate['p1'], 
-                1
+                current_team, 
+                current_name,
+                gamestate['team_size']
             )
-        while len(gamestate['p2']) < 3:
-            gamestate['pokemon_data'] = pokemonselection(
-                gamestate['pokemon_data'], 
-                gamestate['p2'], 
-                2
-            )
+            
+            print("\nCurrent Teams:")
+            if len(gamestate['p1']) > 0:
+                print(f"{name1}: {[p['name'] for p in gamestate['p1']]}")
+            if len(gamestate['p2']) > 0:
+                print(f"{name2}: {[p['name'] for p in gamestate['p2']]}")
+            print()
+    
     gamestate = resetbattle(gamestate)
+    
     battle_continues = True
     while battle_continues:
         battle_continues = conduct_battle_round(gamestate, element)
-        for pokemon in gamestate['p1'] + gamestate['p2']:
-            if pokemon['health'] <= 0:
-                print(f"\n{pokemon['name']} has fainted! Game Over!")
-                battle_continues = False
-                break
-    display_battle_summary(gamestate)
+    
     return gamestate
+
 def gamehistory():
     return {
         'games_played': 0,
         'history': [],
         'current_game': None
     }
+
 def addtohistory(history, game_state):
     history['games_played'] += 1
     p1_health = sum(p['health'] for p in game_state['p1'])
@@ -410,6 +426,7 @@ def addtohistory(history, game_state):
     history['history'].append(game_data)
     history['current_game'] = game_data
     return history
+
 def displayhistory(history):
     print("\n\n=== OVERALL GAME HISTORY ===")
     headers = ["Game", "Team 1", "Team 2", "P1 Health", "P2 Health", "Status"]
@@ -458,47 +475,65 @@ def displayhistory(history):
             stats['draws']
         ])
     print(tabulate(table_data, headers=headers, tablefmt="grid"))
+
 def mainloop():
     gamestate = resetgame()
     element = elementtypes()
     history = gamehistory()
+    current_team_size = 3
+    
     while True:
         any_fainted = False
         fainted_pokemon = []
+        
         if len(gamestate['p1']) > 0 and len(gamestate['p2']) > 0:
             for pokemon in gamestate['p1'] + gamestate['p2']:
                 if pokemon['health'] <= 0:
                     any_fainted = True
                     fainted_pokemon.append(pokemon['name'])
+        
         if any_fainted:
+            print("\nSome Pokemon have fainted:", ", ".join(fainted_pokemon))
             displayhistory(history)
-            print("\nA Pokemon have fainted:", ", ".join(fainted_pokemon))
-            print("Only 'png' (New Game) is available!")
             print("\n'png' to Play New Game(New character) or")
             print("any character to exit")
         else:
             print("\n'png' to Play New Game(New character) or")
             print("'pa' to Play Again(Same set of characters) or")
             print("any character to exit")
-        action = input("type the letter of the operation you want to do: ").lower()
-        if any_fainted and action == "pa":
-            print("\nCannot continue with fainted Pokemon. Please start a new game.")
-            continue
-        if action == "pa" and len(gamestate['p1']) == 0:
-            print("\nNo Pokemon selected. Starting new game instead...")
-            action = "png"
-        if action == "png":
-            gamestate = resetgame()  # Reset game state
-            gamestate = playgame(gamestate, element, newgame=True)
-            history = addtohistory(history, gamestate)  # Add to history
-        elif action == "pa" and not any_fainted:
-            gamestate = resetbattle(gamestate)  # Only reset battle stats
-            gamestate = playgame(gamestate, element, newgame=False)
-            history = addtohistory(history, gamestate)  # Add to history
+            
+        action = input("type the letter of the operation you want to do: ").lower().strip()
+        
+        if action in ['png', 'pa']:
+            if any_fainted and action == "pa":
+                print("\nCannot continue with fainted Pokemon. Please start a new game.")
+                continue
+            
+            if action == "pa" and len(gamestate['p1']) == 0:
+                print("\nNo Pokemon selected. Starting new game instead...")
+                action = "png"
+            
+            if action == "png":
+                while True:
+                    size_input = input("\nChoose team size (3 or 4 Pokemon per team): ").strip()
+                    if size_input in ['3', '4']:
+                        current_team_size = int(size_input)
+                        break
+                    print("Please enter either 3 or 4!")
+                
+                gamestate = resetgame(current_team_size)
+                gamestate = playgame(gamestate, element, newgame=True)
+                history = addtohistory(history, gamestate)
+            elif action == "pa" and not any_fainted:
+                gamestate = resetbattle(gamestate)
+                gamestate = playgame(gamestate, element, newgame=False)
+                history = addtohistory(history, gamestate)
         else:
             print("\n\nThank you for playing!")
             if history['games_played'] > 0:
-                displayhistory(history)  # Show complete history
+                displayhistory(history)
             break
+    
     return
+
 mainloop()
