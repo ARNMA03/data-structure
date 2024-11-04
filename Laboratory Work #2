@@ -1,0 +1,347 @@
+import numpy as np
+import random as rm
+from tabulate import tabulate
+
+def pokemon_data():
+    starter_range = (25, 28)
+    middle_range = (28, 32)
+    high_range = (32, 35)
+    legend_range = (35, 38)
+
+    return np.array([
+        {
+            "name": "Jigglypuff", "power": rm.randint(starter_range[0], starter_range[1]), 
+            "health": 100, "poison": 10, 
+            "heal": 20, "type": "Normal"
+        },
+        {
+            "name": "Pikachu", "power": rm.randint(middle_range[0], middle_range[1]), 
+            "health": 100, "poison": 10, 
+            "heal": 20, "type": "Electric"
+        },
+        {
+            "name": "Eevee", "power": rm.randint(starter_range[0], starter_range[1]), 
+            "health": 100, "poison": 10, 
+            "heal": 20, "type": "Normal"
+        },
+        {
+            "name": "Charmander", "power": rm.randint(middle_range[0], middle_range[1]), 
+            "health": 100, "poison": 10, 
+            "heal": 20, "type": "Fire"
+        },
+        {
+            "name": "Squirtle", 
+            "power": rm.randint(middle_range[0], middle_range[1]), 
+            "health": 100, "poison": 10, 
+            "heal": 20, "type": "Water"
+        },
+        {
+            "name": "Bulbasaur", "power": rm.randint(middle_range[0], middle_range[1]), 
+            "health": 100, "poison": 10, 
+            "heal": 20, "type": "Grass"
+        },
+        {
+            "name": "Gengar", "power": rm.randint(high_range[0], high_range[1]), 
+            "health": 100, "poison": 10, 
+            "heal": 20, "type": "Poison"
+        },
+        {
+            "name": "Machamp", "power": rm.randint(high_range[0], high_range[1]), 
+            "health": 100, "poison": 10, 
+            "heal": 20, "type": "Fighting"
+        },
+        {
+            "name": "Snorlax", "power": rm.randint(high_range[0], high_range[1]), 
+            "health": 100, "poison": 10, 
+            "heal": 20, "type": "Normal"
+        },
+        {
+            "name": "Mewtwo", "power": rm.randint(legend_range[0], legend_range[1]), 
+            "health": 100, "poison": 10, 
+            "heal": 20, "type": "Psychic"
+        }
+    ], dtype=object)
+
+def elementtypes():
+    return {
+        "Electric": [["Water"], ["None"]],
+        "Fire": [["Grass"], ["Water", "Fire"]],
+        "Water": [["Fire"], ["Electric", "Grass"]],
+        "Normal": [["None"], ["None"]],
+        "Fighting": [["Normal"], ["Psychic"]],
+        "Psychic": [["Fighting"], ["None"]],
+        "Grass": [["Water"], ["Fire"]],
+        "Poison": [["Grass"], ["Poison", "Psychic"]]
+    }
+
+def resetgame():
+    return {
+        'pokemon_data': pokemon_data(),
+        'p1': [],
+        'p2': [],
+        'battle': [],
+        'battled_pokemon': set(),
+        'battle_counter': 0,
+        'grant': 5,
+        'fatigue': 2
+    }
+
+def pokemonlist(pokemon_data):
+    print("\n(Pokemon name, Power, Health, Poison, Potion, Element)")
+    for i, pokemon in enumerate(pokemon_data, start=1):
+        print(f"{i}. {pokemon['name']}, {pokemon['power']}, {pokemon['health']}, {pokemon['poison']}, {pokemon['heal']}, {pokemon['type']}")
+
+def pokemonselection(pokemon_data, player_pokemon, player_num):
+    selection = int(input(f"Choose your Pokémon, Player {player_num} (1-{len(pokemon_data)}): ")) - 1
+    if 0 <= selection < len(pokemon_data):
+        player_pokemon.append(pokemon_data[selection])
+        pokemon_data = np.delete(pokemon_data, selection)
+        print(f"\nPlayer {player_num} selected: {[p['name'] for p in player_pokemon]}\n")
+        pokemonlist(pokemon_data)
+    else:
+        print(f"Invalid selection. Please choose a number between 1 and {len(pokemon_data)}")
+    return pokemon_data
+
+def processactions(p1_pokemon, p2_pokemon):
+    actionp1 = input(f"Player 1, do you want to use 'poison' or 'potion' or 'pandp' for {p1_pokemon['name']}? (Enter 'none' to skip): ").lower()
+    actionp2 = input(f"Player 2, do you want to use 'poison' or 'potion' or 'pandp' for {p2_pokemon['name']}? (Enter 'none' to skip): ").lower()
+    if actionp1 == "poison":
+        p2_pokemon["power"] -= p1_pokemon["poison"]
+        p1_pokemon["poison"] = 0
+    elif actionp1 == "potion":
+        p1_pokemon["power"] += p1_pokemon["heal"]
+        p1_pokemon["heal"] = 0
+    elif actionp1 == "pandp":
+        p2_pokemon["power"] -= p1_pokemon["poison"]
+        p1_pokemon["poison"] = 0
+        p1_pokemon["power"] += p1_pokemon["heal"]
+        p1_pokemon["heal"] = 0
+    else:
+        print("Wrong input!")
+    if actionp2 == "poison":
+        p1_pokemon["power"] -= p2_pokemon["poison"]
+        p2_pokemon["poison"] = 0
+    elif actionp2 == "potion":
+        p2_pokemon["power"] += p2_pokemon["heal"]
+        p2_pokemon["heal"] = 0
+    elif actionp2 == "pandp":
+        p1_pokemon["power"] -= p2_pokemon["poison"]
+        p2_pokemon["poison"] = 0
+        p2_pokemon["power"] += p2_pokemon["heal"]
+        p2_pokemon["heal"] = 0
+    else:
+        print("Wrong input!")
+
+def calculateoutcome(p1_pokemon, p2_pokemon, grant, fatigue):
+    if p1_pokemon["power"] > p2_pokemon["power"]:
+        p2_pokemon["health"] -= 10
+        p1_pokemon["health"] -= fatigue
+        p2_pokemon["health"] -= fatigue
+        p1_pokemon["health"] += grant
+        if p1_pokemon["health"] <= 0:
+            print(f"\n{p1_pokemon['name']} has fainted! Game Over!")
+            return "exit"
+        if p2_pokemon["health"] <= 0:
+            print(f"\n{p2_pokemon['name']} has fainted! Game Over!")
+            return "exit"
+            
+        return f"{p1_pokemon['name']} wins!"
+        
+    elif p1_pokemon["power"] < p2_pokemon["power"]:
+        p1_pokemon["health"] -= 10
+        p1_pokemon["health"] -= fatigue
+        p2_pokemon["health"] -= fatigue
+        p2_pokemon["health"] += grant
+        if p1_pokemon["health"] <= 0:
+            print(f"\n{p1_pokemon['name']} has fainted! Game Over!")
+            return "exit"
+        if p2_pokemon["health"] <= 0:
+            print(f"\n{p2_pokemon['name']} has fainted! Game Over!")
+            return "exit"
+            
+        return f"{p2_pokemon['name']} wins!"
+        
+    else:
+        p1_pokemon["health"] -= fatigue
+        p2_pokemon["health"] -= fatigue
+        if p1_pokemon["health"] <= 0:
+            print(f"\n{p1_pokemon['name']} has fainted! Game Over!")
+            return "exit"
+        if p2_pokemon["health"] <= 0:
+            print(f"\n{p2_pokemon['name']} has fainted! Game Over!")
+            return "exit"
+            
+        return "Tie!"
+
+def conductbattle(game_state, element):
+    if len(game_state['battled_pokemon']) < 6:
+        player1_index = rm.choice([i for i in range(3) if game_state['p1'][i]['name'] not in game_state['battled_pokemon']])
+        player2_index = rm.choice([i for i in range(3) if game_state['p2'][i]['name'] not in game_state['battled_pokemon']])
+        
+        p1_pokemon = game_state['p1'][player1_index]
+        p2_pokemon = game_state['p2'][player2_index]
+        
+        game_state['battle'].append([p1_pokemon, p2_pokemon])
+        game_state['battled_pokemon'].add(p1_pokemon["name"])
+        game_state['battled_pokemon'].add(p2_pokemon["name"])
+        game_state['battle_counter'] += 1
+        
+        print(f"\nBattle {game_state['battle_counter']}: {p1_pokemon['name']} vs {p2_pokemon['name']}")
+        
+        battle_result = None
+        if p1_pokemon["type"] in element[p2_pokemon["type"]][0]:
+            print(f"{p1_pokemon['name']} ({p1_pokemon['type']}) is strong against {p2_pokemon['name']} ({p2_pokemon['type']})")
+            p2_pokemon["power"] -= p1_pokemon["poison"]
+            p1_pokemon["poison"] = 0
+            p1_pokemon["power"] += p1_pokemon["heal"]
+            p1_pokemon["heal"] = 0
+            print(f"{p2_pokemon['name']} ({p2_pokemon['type']}) is weak against {p1_pokemon['name']} ({p1_pokemon['type']})")
+            p1_pokemon["power"] -= p2_pokemon["poison"]
+            p2_pokemon["poison"] = 0
+            p2_pokemon["power"] += p2_pokemon["heal"]
+            p2_pokemon["heal"] = 0
+            battle_result = calculateoutcome(p1_pokemon, p2_pokemon, game_state['grant'], game_state['fatigue'])
+        elif p1_pokemon["type"] in element[p2_pokemon["type"]][1]:
+            print(f"{p2_pokemon['name']} ({p2_pokemon['type']}) is strong against {p1_pokemon['name']} ({p1_pokemon['type']})")
+            p1_pokemon["power"] -= p2_pokemon["poison"]
+            p2_pokemon["poison"] = 0
+            p2_pokemon["power"] += p2_pokemon["heal"]
+            p2_pokemon["heal"] = 0
+            print(f"{p1_pokemon['name']} ({p1_pokemon['type']}) is weak against {p2_pokemon['name']} ({p2_pokemon['type']})")
+            p2_pokemon["power"] -= p1_pokemon["poison"]
+            p1_pokemon["poison"] = 0
+            p1_pokemon["power"] += p1_pokemon["heal"]
+            p1_pokemon["heal"] = 0
+            battle_result = calculateoutcome(p1_pokemon, p2_pokemon, game_state['grant'], game_state['fatigue'])
+        else:
+            print(f"{p1_pokemon['name']} ({p1_pokemon['type']}) is neutral against {p2_pokemon['name']} ({p2_pokemon['type']})")
+            processactions(p1_pokemon, p2_pokemon)
+            battle_result = calculateoutcome(p1_pokemon, p2_pokemon, game_state['grant'], game_state['fatigue'])
+        
+        print(battle_result)
+        if battle_result == "exit":
+            return False
+            
+        print(f"Battle log:")
+        print(tabulate(game_state['battle'], headers=["Player 1 Pokémon", "Player 2 Pokémon"], tablefmt="grid"))
+        return True
+    else:
+        print("All Pokémon have participated in a battle!")
+        return False
+
+def resetbattle(gamestate):
+    gamestate['battle'] = []
+    gamestate['battled_pokemon'] = set()
+    gamestate['battle_counter'] = 0
+    return gamestate
+
+def displaysummary(game_state):
+    print("\n=== BATTLE SUMMARY ===")
+    print(f"Total battles fought: {game_state['battle_counter']}")
+    p1_total_health = sum(pokemon['health'] for pokemon in game_state['p1'])
+    p2_total_health = sum(pokemon['health'] for pokemon in game_state['p2'])
+    
+    print("\nPlayer 1 Pokemon Status:")
+    for pokemon in game_state['p1']:
+        print(f"{pokemon['name']}: Health={pokemon['health']}, Power={pokemon['power']}")
+    print(f"Total Team Health: {p1_total_health}")
+    
+    print("\nPlayer 2 Pokemon Status:")
+    for pokemon in game_state['p2']:
+        print(f"{pokemon['name']}: Health={pokemon['health']}, Power={pokemon['power']}")
+    print(f"Total Team Health: {p2_total_health}")
+    
+    print("\nTeam Health Comparison:")
+    if p1_total_health > p2_total_health:
+        print(f"Player 1 leads by {p1_total_health - p2_total_health} health points!")
+    elif p2_total_health > p1_total_health:
+        print(f"Player 2 leads by {p2_total_health - p1_total_health} health points!")
+    else:
+        print("Both teams have equal total health!")
+    
+    print("\nBattle History:")
+    for i, battle in enumerate(game_state['battle'], 1):
+        print(f"Round {i}: {battle[0]['name']} vs {battle[1]['name']}")
+    print("==================\n")
+
+def playgame(gamestate, element, newgame=False):
+    if newgame:
+        gamestate = resetgame()
+        pokemonlist(gamestate['pokemon_data'])
+    else:
+        gamestate = resetbattle(gamestate)
+    
+    while True:
+        if len(gamestate['p1']) == 3 and len(gamestate['p2']) == 3:
+            if not conductbattle(gamestate, element):
+                displaysummary(gamestate)
+                break
+        elif len(gamestate['p1']) != 3:
+            gamestate['pokemon_data'] = pokemonselection(
+                gamestate['pokemon_data'], 
+                gamestate['p1'], 
+                1
+            )
+        elif len(gamestate['p2']) != 3:
+            gamestate['pokemon_data'] = pokemonselection(
+                gamestate['pokemon_data'], 
+                gamestate['p2'], 
+                2
+            )
+    
+    return gamestate
+
+def gamehistory():
+    return {
+        'rounds': [],
+        'games_played': 0
+    }
+
+def addtohistory(history, game_state):
+    p1_health = sum(pokemon['health'] for pokemon in game_state['p1'])
+    p2_health = sum(pokemon['health'] for pokemon in game_state['p2'])
+    
+    status = "Player 1 won" if p1_health > p2_health else "Player 2 won" if p2_health > p1_health else "Tie"
+    
+    history['rounds'].append({
+        'game_number': history['games_played'] + 1,
+        'p1_health': p1_health,
+        'p2_health': p2_health,
+        'status': status
+    })
+    history['games_played'] += 1
+    return history
+
+def displayhistory(history):
+    print("\n=== OVERALL GAME HISTORY ===")
+    headers = ["Game", "Player 1 Health", "Player 2 Health", "Status"]
+    table_data = [
+        [f"Game {round['game_number']}", 
+         round['p1_health'], 
+         round['p2_health'], 
+         round['status']] 
+        for round in history['rounds']
+    ]
+    print(tabulate(table_data, headers=headers, tablefmt="grid"))
+    print("==========================\n")
+
+def mainloop():
+    gamestate = resetgame()
+    element = elementtypes()
+    history = gamehistory()
+    
+    while True:
+        action = input(" Welcome players!\n'png' to Play New Game(New character) or \n'pa' to Play Again(Same set of characters) or \n any character to exit \n type the letter of the operation you want to do: ").lower()
+        
+        if action == "png":
+            gamestate = playgame(gamestate, element, newgame=True)
+            history = addtohistory(history, gamestate)
+        elif action == "pa":
+            gamestate = playgame(gamestate, element, newgame=False)
+            history = addtohistory(history, gamestate)
+        else:
+            print(" Thankyou for playing!")
+            displayhistory(history)
+            exit()
+
+mainloop()

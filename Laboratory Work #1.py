@@ -75,6 +75,7 @@ while True:
        random_variation = rm.uniform(0.01, 1.5)
        final_user_power = abs(base_computer - (base_user * random_variation))
        final_computer_power = abs(base_user + (base_computer * random_variation))
+<<<<<<< HEAD
 
    # Display Battle Results
    print(f"User chose {pokemon_dict[user][0]} with power {final_user_power:.2f}")
@@ -200,4 +201,132 @@ while True:
            exit()
        else:
            print("Invalid input, please try again.")
+=======
+
+   # Display Battle Results
+   print(f"User chose {pokemon_dict[user][0]} with power {final_user_power}")
+   print(f"Computer chose {pokemon_dict[computer_key][0]} with power {final_computer_power}")
+
+   # Determine Winner and Absorb Power
+   if final_user_power > final_computer_power:
+       print("User won!")
+       user_wins += 1
+       status = "User won"
+       user_pick = pokemon_dict[user][0]
+       computer_pick = pokemon_dict[computer_key][0]
+       # Absorb computer's power
+       final_user_power += final_computer_power  # Winner absorbs loser's power
+       computer_key = None  # Reset computer's Pokémon for the next round
+       rounds_played += 1
+       round_details.append([rounds_played, user_pick, final_user_power, computer_pick, final_computer_power, status])
+       while True:
+           game = input(
+               "\n'C' to continue to battle\n'N' for new character selection\n'X' to quit\nWould you like to proceed? ").lower()
+           if game == "c":
+               computer_key = None
+               break
+           elif game == "n":
+               user = None  # Reset user choice
+               final_user_power = 0  # Reset user power
+               final_computer_power = 0  # Reset computer power
+               break
+           elif game == "x":
+               # Display Final Results
+               print("\nRound Details:")
+               print(tabulate(round_details,
+                              headers=["Battle number", "User pokemon", "User power", "Computer pokemon",
+                                       "Computer power", "Status"],
+                              tablefmt="grid"))
+               if user_wins > computer_wins:
+                   print("\nOverall Result: User won more rounds!")
+               elif computer_wins > user_wins:
+                   print("\nOverall Result: Computer won more rounds!")
+               else:
+                   print("\nOverall Result: It's a tie overall!")
+               print(f"""                User won {user_wins} times
+               Computer won {computer_wins} times
+               Match tied {ties} times""")
+               exit()
+           else:
+               print("Invalid input, please try again.")
+   elif final_user_power < final_computer_power:
+       print("Computer won!")
+       computer_wins += 1
+       status = "Computer won"
+       user_pick = pokemon_dict[user][0]
+       computer_pick = pokemon_dict[computer_key][0]
+       # Absorb user's power
+       final_computer_power += final_user_power  # Winner absorbs loser's power
+       user = None  # User must select a new Pokémon
+       rounds_played += 1
+       round_details.append([rounds_played, user_pick, final_user_power, computer_pick, final_computer_power, status])
+       while True:
+           game = input(
+               "\n'N' for new character selection\n'X' to quit\nWould you like to proceed? ").lower()
+           if game == "n":
+               user = None  # Reset user choice
+               final_user_power = 0
+               break
+           elif game == "x":
+               # Display Final Results
+               print("\nRound Details:")
+               print(tabulate(round_details,
+                              headers=["Battle number", "User pokemon", "User power", "Computer pokemon",
+                                       "Computer power", "Status"],
+                              tablefmt="grid"))
+               if user_wins > computer_wins:
+                   print("\nOverall Result: User won more rounds!")
+               elif computer_wins > user_wins:
+                   print("\nOverall Result: Computer won more rounds!")
+               else:
+                   print("\nOverall Result: It's a tie overall!")
+               print(f"""                User won {user_wins} times
+               Computer won {computer_wins} times
+               Match tied {ties} times""")
+               exit()
+           else:
+               print("Invalid input, please try again.")
+
+   else:
+       print("It's a tie!")
+       ties += 1
+       status = "Tie"
+       user_pick = pokemon_dict[user][0]
+       computer_pick = pokemon_dict[computer_key][0]
+       user = None  # User must select a new Pokémon
+       rounds_played += 1
+       round_details.append([rounds_played, user_pick, final_user_power, computer_pick, final_computer_power, status])
+       game = input(
+           "\n'C' to continue to battle\n'N' for new character selection\n'X' to quit\nWould you like to proceed? ").lower()
+       if game == "c":
+           computer_key = None
+           user = None
+           break
+       elif game == "n":
+           user = None  # Reset user choice
+           computer_key = None  # Reset computer choice
+           final_user_power = 0  # Reset user power
+           final_computer_power = 0  # Reset computer power
+           break
+       elif game == "x":
+           # Display Final Results
+           print("\nRound Details:")
+           print(tabulate(round_details,
+                          headers=["Battle number", "User pokemon", "User power", "Computer pokemon",
+                                   "Computer power", "Status"],
+                          tablefmt="grid"))
+           if user_wins > computer_wins:
+               print("\nOverall Result: User won more rounds!")
+           elif computer_wins > user_wins:
+               print("\nOverall Result: Computer won more rounds!")
+           else:
+               print("\nOverall Result: It's a tie overall!")
+           print(f"""                User won {user_wins} times
+           Computer won {computer_wins} times
+           Match tied {ties} times""")
+           exit()
+       else:
+           print("Invalid input, please try again.")
+
+>>>>>>> 06cde12aa163f0f481db3334cfaf68d3355f845a
 

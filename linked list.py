@@ -11,9 +11,18 @@ class linkedlist:
     def athead(self, newdata):
         NewNode = Node(newdata)
         if self.head is None:
+<<<<<<< HEAD
             NewNode = Node(newdata)
             NewNode.next = self.head
             self.Head = NewNode
+=======
+            self.Head = newnode
+            return
+        lastnode = self.head
+        while (lastnode.next):
+            lastnode = lastnode.next
+        lastnode.next = NewNode
+>>>>>>> 06cde12aa163f0f481db3334cfaf68d3355f845a
     
     def inpos(self,newelement,position):
         NewNode = Node(newelement)
@@ -67,11 +76,22 @@ class linkedlist:
             return
         prev.next = temp.next
         temp = None
+<<<<<<< HEAD
+=======
+# class Node:
+#     def __init__(self, data=None):
+#         self.data = data
+#         self.next = None
+>>>>>>> 06cde12aa163f0f481db3334cfaf68d3355f845a
 
 class Node:
     def __init__(self, data):
         self.data = data
         self.next = None
+<<<<<<< HEAD
+=======
+        self.prev = None
+>>>>>>> 06cde12aa163f0f481db3334cfaf68d3355f845a
 
     def InsertToEmptyList(self, data):
         if self.start_node is None:
@@ -125,6 +145,7 @@ class Node:
                 n = n.next
         print("\n")
 
+<<<<<<< HEAD
 list1 = linkedlist()
 list1.head = Node("Data")
 e2 = Node("Structure")
@@ -138,3 +159,50 @@ list1.athead("Welcome to")
 
 list1.athead("Linked List")
 list1.printlist()
+=======
+class doublyLinkedList:
+    def __init__ (self):
+        self.start_node = None
+
+# list1 = linkedlist()
+# list1.head = Node("Data")
+# e2 = Node("Structure")
+# e3 = Node("Python")
+
+# list1.head.next = e2
+# e2.next = e3
+
+#list1.athead("Welcome to")
+#list1.printlist()
+
+#list1.athead("Linked List")
+#list1.printlist()
+
+# position = int(input("\n Where to insert Data, please indicate position number:")) 
+# data = "Stack"
+# list1.inpos(data, position)
+#list1.printlist()
+
+list1 = linkedlist()
+list1.headval = Node("Data")
+s2 = Node("Structure")
+s3 = Node("Data")
+s4 = Node("Mining")
+s5 = Node("Data")
+s6 = Node("Cleaning")
+s7 = Node("Game")
+s8 = Node("Development")
+
+list1.headval.nextval = s2
+s2.nextval = s3
+s3.nextval = s4
+s4.nextval = s5
+s5.nextval = s6
+s6.nextval = s7
+s7.nextval = s8
+
+list1.printlist()
+a = input("Search: ")
+
+list1.searchelement(a)
+>>>>>>> 06cde12aa163f0f481db3334cfaf68d3355f845a
