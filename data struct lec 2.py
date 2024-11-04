@@ -23,12 +23,12 @@ while True:
 
         for i in range(2):
             while True:
-                user = input("\tEnter a non-negative integer: ")
-                if user.isdigit() and int(user) >= 0:
-                    user_input.append(int(user))
+                user = input("\tEnter a non-negative integer or decimal number: ")
+                if user.replace('.', '', 1).isdigit() and float(user) >= 0:
+                    user_input.append(float(user))
                     break
                 else:
-                    print("\tInvalid input, please enter an integer or a valid non-negative integer.")
+                    print("\tInvalid input, please enter a valid non-negative number.")
         if user_input[0] < 0 or user_input[1] < 0:
             print("\tPlease input non-negative numbers")
         else:
