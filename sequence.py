@@ -177,10 +177,6 @@ def processactions(p1_pokemon, p2_pokemon, name1, name2):
     print(f"{name2}'s {p2_pokemon['name']}: Power={p2_pokemon['power']}, Poison={p2_pokemon['poison']}, Heal={p2_pokemon['heal']}")
 
 def calculate_battle_outcome(p1_pokemon, p2_pokemon, grant, fatigue):
-    print(f"\nBefore battle:")
-    print(f"{p1_pokemon['name']}: HP={p1_pokemon['health']}, Power={p1_pokemon['power']}")
-    print(f"{p2_pokemon['name']}: HP={p2_pokemon['health']}, Power={p2_pokemon['power']}")
-    
     # Calculate battle outcome
     if p1_pokemon["power"] > p2_pokemon["power"]:
         # P1 wins: P2 takes damage, P1 gets grant, both get fatigue
@@ -451,7 +447,7 @@ def addtohistory(history, game_state):
 
 def displayhistory(history):
     print("\n\n=== OVERALL GAME HISTORY ===")
-    headers = ["Game", "Team 1", "Team 2", "P1 Health", "P2 Health", "Status"]
+    headers = ["Game", "Team 1", "P1 Health", "Team 2", "P2 Health", "Status"]
     table_data = []
     for game in history['history']:
         p1_team = ", ".join([p['name'] for p in game['p1_team']])
@@ -459,8 +455,8 @@ def displayhistory(history):
         table_data.append([
             f"Game {game['game_number']}", 
             p1_team,
-            p2_team,
             game['p1_health'], 
+            p2_team,
             game['p2_health'], 
             game['status']
         ])
