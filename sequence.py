@@ -4,57 +4,16 @@ from tabulate import tabulate
 
 def pokemon_data():
     return np.array([
-        {
-            "name": "Jigglypuff", "power": 31, 
-            "health": 100, "poison": 10, 
-            "heal": 20, "type": "Normal"
-        },
-        {
-            "name": "Pikachu", "power": 23, 
-            "health": 100, "poison": 10, 
-            "heal": 20, "type": "Electric"
-        },
-        {
-            "name": "Eevee", "power": 34, 
-            "health": 100, "poison": 10, 
-            "heal": 20, "type": "Normal"
-        },
-        {
-            "name": "Charmander", "power": 28, 
-            "health": 100, "poison": 10, 
-            "heal": 20, "type": "Fire"
-        },
-        {
-            "name": "Squirtle", 
-            "power": 32, 
-            "health": 100, "poison": 10, 
-            "heal": 20, "type": "Water"
-        },
-        {
-            "name": "Bulbasaur", "power": 29, 
-            "health": 100, "poison": 10, 
-            "heal": 20, "type": "Grass"
-        },
-        {
-            "name": "Gengar", "power": 27, 
-            "health": 100, "poison": 10, 
-            "heal": 20, "type": "Poison"
-        },
-        {
-            "name": "Machamp", "power": 26, 
-            "health": 100, "poison": 10, 
-            "heal": 20, "type": "Fighting"
-        },
-        {
-            "name": "Snorlax", "power": 21, 
-            "health": 100, "poison": 10, 
-            "heal": 20, "type": "Normal"
-        },
-        {
-            "name": "Mewtwo", "power": 25, 
-            "health": 100, "poison": 10, 
-            "heal": 20, "type": "Psychic"
-        }
+        {"name": "Jigglypuff", "power": 31, "health": 100, "poison": 10, "heal": 20, "type": "Normal"},
+        {"name": "Pikachu", "power": 23, "health": 100, "poison": 10, "heal": 20, "type": "Electric"},
+        {"name": "Eevee", "power": 34,"health": 100, "poison": 10,"heal": 20, "type": "Normal"},
+        {"name": "Charmander", "power": 28,"health": 100, "poison": 10,"heal": 20, "type": "Fire"},
+        {"name": "Squirtle", "power": 32, "health": 100, "poison": 10, "heal": 20, "type": "Water"},
+        {"name": "Bulbasaur", "power": 29, "health": 100, "poison": 10, "heal": 20, "type": "Grass"},
+        {"name": "Gengar", "power": 27, "health": 100, "poison": 10, "heal": 20, "type": "Poison"},
+        {"name": "Machamp", "power": 26, "health": 100, "poison": 10, "heal": 20, "type": "Fighting"},
+        {"name": "Snorlax", "power": 21, "health": 100, "poison": 10, "heal": 20, "type": "Normal"},
+        {"name": "Mewtwo", "power": 25, "health": 100, "poison": 10, "heal": 20, "type": "Psychic"}
     ], dtype=object)
 
 def elementtypes():
@@ -149,7 +108,7 @@ def processactions(p1_pokemon, p2_pokemon, name1, name2):
         print(f"{name1}'s {p1_pokemon['name']} has no items left to use!")
     
     if p2_can_act:
-        actionp2 = input(f"{name2}, do you want to use 'poison' or 'potion' or 'pandp' for {p2_pokemon['name']}? (Enter 'none' to skip): ").lower()
+        actionp2 = input(f"{name2}, do you want to use 'poison' or 'potion' or 'pandp'(both) for {p2_pokemon['name']}? (Enter 'none' to skip): ").lower()
         if actionp2 == "poison" and p2_pokemon['poison'] > 0:
             p1_pokemon["power"] -= p2_pokemon["poison"]
             p2_pokemon["poison"] = 0
