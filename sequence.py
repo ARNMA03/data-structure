@@ -1,7 +1,6 @@
 import numpy as np
 import random as rm
 from tabulate import tabulate
-import sys
 
 def pokemon_data():
     return np.array([
