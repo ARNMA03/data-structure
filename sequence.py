@@ -127,7 +127,7 @@ def processactions(p1_pokemon, p2_pokemon, name1, name2):
         return
         
     if p1_can_act:
-        actionp1 = input(f"{name1}, do you want to use 'poison' or 'potion' or 'pandp' for {p1_pokemon['name']}? (Enter 'none' to skip): ").lower()
+        actionp1 = input(f"{name1}, do you want to use 'poison' or 'potion' or 'pandp'(both) for {p1_pokemon['name']}? (Enter 'none' to skip): ").lower()
         if actionp1 == "poison" and p1_pokemon['poison'] > 0:
             p2_pokemon["power"] -= p1_pokemon["poison"]
             p1_pokemon["poison"] = 0
@@ -249,11 +249,18 @@ def conduct_battle_round(game_state, element):
     if available_p1 and available_p2:
         p1_pokemon = available_p1[0]
         p2_pokemon = available_p2[0]
+        name1 = game_state['player_names'][1]
+        name2 = game_state['player_names'][2]
         
-        print(f"\nBattle {game_state['battle_counter'] + 1}: {game_state['player_names'][1]}'s {p1_pokemon['name']} vs {game_state['player_names'][2]}'s {p2_pokemon['name']}")
+        # Battle display and logic using direct Pokemon properties
+        print(f"\nBattle {game_state['battle_counter'] + 1}: {name1}'s {p1_pokemon['name']} vs {name2}'s {p2_pokemon['name']}")
+        
+        print("\nCurrent Stats:")
+        print(f"{name1}'s {p1_pokemon['name']}: Power={p1_pokemon['power']}, Poison={p1_pokemon['poison']}, Heal={p1_pokemon['heal']}")
+        print(f"{name2}'s {p2_pokemon['name']}: Power={p2_pokemon['power']}, Poison={p2_pokemon['poison']}, Heal={p2_pokemon['heal']}")
         
         # Process player actions
-        processactions(p1_pokemon, p2_pokemon, game_state['player_names'][1], game_state['player_names'][2])
+        processactions(p1_pokemon, p2_pokemon, name1, name2)
         
         # Calculate battle outcome
         battle_result = calculate_battle_outcome(p1_pokemon, p2_pokemon, game_state['grant'], game_state['fatigue'])
@@ -288,7 +295,7 @@ def conduct_battle_round(game_state, element):
         
         # Display battle log
         print("\nBattle Log:")
-        headers = ["Round", game_state['player_names'][1], game_state['player_names'][2], "Result"]
+        headers = ["Round", name1, name2, "Result"]
         table_data = [[
             f"Battle {b['round']}", 
             f"{b['p1_name']} (HP:{b['p1_health']}, PWR:{b['p1_power']}, PSN:{b['p1_poison']}, HEL:{b['p1_heal']})", 
@@ -375,46 +382,55 @@ def coin_toss():
         first_player_name = p2_name
         print(f"\n{p1_name} called it wrong!")
     
-    print(f"{first_player_name} will pick first!")
+    print(f"{first_player_name} will pick first and have the rights to choose the team size!")
     
     return first_player, p1_name, p2_name
 
-def playgame(gamestate, element, newgame=True):
+def playgame(gamestate, element, newgame=True, skip_names=False):
+    if newgame and not skip_names:
+        print("\n=== PLAYER NAMES ===")
+        gamestate['player_names'] = {
+            1: input("Enter Player 1's name: "),
+            2: input("Enter Player 2's name: ")
+        }
+    
+    # Initialize or reset battle-related fields
+    if newgame:
+        gamestate['p1'] = []
+        gamestate['p2'] = []
+        gamestate['battle'] = []
+        gamestate['battled_pokemon'] = set()
+        gamestate['battle_counter'] = 0
+    
+    # Pokemon selection for new game
     if newgame:
         print(f"\nEach player will select {gamestate['team_size']} Pokemon!")
         
-        # Determine first player with coin toss and get names
-        first_player, name1, name2 = coin_toss()
-        
-        # Store names in gamestate for future reference
-        gamestate['player_names'] = {1: name1, 2: name2}
-        
         # Alternate selections between players
-        for i in range(gamestate['team_size'] * 2):
-            current_player = first_player if i % 2 == 0 else (3 - first_player)
-            current_team = gamestate['p1'] if current_player == 1 else gamestate['p2']
-            current_name = name1 if current_player == 1 else name2
+        for i in range(gamestate['team_size'] * 2):  # Total selections needed
+            current_player = 1 if i % 2 == 0 else 2  # Alternate between 1 and 2
+            player_list = gamestate['p1'] if current_player == 1 else gamestate['p2']
+            player_name = gamestate['player_names'][current_player]
             
-            print(f"\n{current_name}, select your Pokemon! ({len(current_team)}/{gamestate['team_size']})")
+            print(f"\n{player_name}, select your Pokemon! ({len(player_list)}/{gamestate['team_size']})")
+            
+            # Show current teams after each selection
+            if i > 0:
+                print("\nCurrent Teams:")
+                if len(gamestate['p1']) > 0:
+                    print(f"{gamestate['player_names'][1]}: {[p['name'] for p in gamestate['p1']]}")
+                if len(gamestate['p2']) > 0:
+                    print(f"{gamestate['player_names'][2]}: {[p['name'] for p in gamestate['p2']]}")
+                print()
+            
             gamestate['pokemon_data'] = pokemonselection(
                 gamestate['pokemon_data'], 
-                current_team, 
-                current_name,  # Pass name instead of player number
+                player_list, 
+                player_name, 
                 gamestate['team_size']
             )
-            
-            # Show both teams' current selections
-            print("\nCurrent Teams:")
-            if len(gamestate['p1']) > 0:
-                print(f"{name1}: {[p['name'] for p in gamestate['p1']]}")
-            if len(gamestate['p2']) > 0:
-                print(f"{name2}: {[p['name'] for p in gamestate['p2']]}")
-            print()
     
-    # Reset battle stats
-    gamestate = resetbattle(gamestate)
-    
-    # Conduct battles
+    # Battle continues until all Pokemon have battled
     battle_continues = True
     while battle_continues:
         battle_continues = conduct_battle_round(gamestate, element)
@@ -429,20 +445,31 @@ def gamehistory():
     }
 
 def addtohistory(history, game_state):
+    if game_state is None or 'p1' not in game_state or 'p2' not in game_state:
+        print("Warning: Invalid game state")
+        return history
+        
     history['games_played'] += 1
-    p1_health = sum(p['health'] for p in game_state['p1'])
-    p2_health = sum(p['health'] for p in game_state['p2'])
-    game_data = {
-        'game_number': history['games_played'],
-        'p1_health': p1_health,
-        'p2_health': p2_health,
-        'p1_team': [{'name': p['name'], 'type': p['type']} for p in game_state['p1']],
-        'p2_team': [{'name': p['name'], 'type': p['type']} for p in game_state['p2']],
-        'battles': game_state['battle'].copy(),
-        'status': 'Player 1 won' if p1_health > p2_health else 'Player 2 won' if p2_health > p1_health else 'Draw'
-    }
-    history['history'].append(game_data)
-    history['current_game'] = game_data
+    try:
+        p1_health = sum(p['health'] for p in game_state['p1'])
+        p2_health = sum(p['health'] for p in game_state['p2'])
+        
+        game_data = {
+            'game_number': history['games_played'],
+            'p1_health': p1_health,
+            'p2_health': p2_health,
+            'p1_team': [{'name': p['name'], 'type': p['type']} for p in game_state['p1']],
+            'p2_team': [{'name': p['name'], 'type': p['type']} for p in game_state['p2']],
+            'battles': game_state['battle'].copy() if 'battle' in game_state else [],
+            'status': 'Player 1 won' if p1_health > p2_health else 'Player 2 won' if p2_health > p1_health else 'Draw'
+        }
+        
+        history['history'].append(game_data)
+        history['current_game'] = game_data
+        
+    except Exception as e:
+        print(f"Warning: Error processing game history - {str(e)}")
+    
     return history
 
 def displayhistory(history):
@@ -498,7 +525,6 @@ def mainloop():
     gamestate = resetgame()
     element = elementtypes()
     history = gamehistory()
-    current_team_size = 3
     
     while True:
         # Check for fainted Pokemon
@@ -507,7 +533,7 @@ def mainloop():
         
         if len(gamestate['p1']) > 0 and len(gamestate['p2']) > 0:
             for pokemon in gamestate['p1'] + gamestate['p2']:
-                if pokemon['health'] <= 0:
+                if pokemon['health'] <= 0:  # Simplified check
                     any_fainted = True
                     fainted_pokemon.append(pokemon['name'])
         
@@ -534,20 +560,56 @@ def mainloop():
                 action = "png"
             
             if action == "png":
-                # Ask for team size when starting new game
+                # Get player names first
+                print("\n=== PLAYER NAMES ===")
+                name1 = input("Enter Player 1's name: ")
+                name2 = input("Enter Player 2's name: ")
+                
+                # Do coin toss
+                print("\n=== COIN TOSS ===")
                 while True:
-                    size_input = input("\nChoose team size (3 or 4 Pokemon per team): ").strip()
+                    call = input(f"{name1}, call Heads or Tails: ").lower()
+                    if call in ['heads', 'tails']:
+                        break
+                    print("Please enter either 'Heads' or 'Tails'!")
+                
+                print(f"\n{name1} called: {call.capitalize()}")
+                input("Press Enter to flip the coin...")
+                
+                result = "heads" if rm.random() < 0.5 else "tails"
+                print(f"\nThe coin shows: {result.capitalize()}!")
+                
+                # Determine winner of coin toss
+                coin_winner = name1 if call == result else name2
+                coin_loser = name2 if call == result else name1
+                print(f"\n{coin_winner} {'called it right' if call == result else 'wins the toss'}!")
+                print(f"{coin_winner} will pick first!")
+                
+                # Winner chooses team size
+                print(f"\n=== TEAM SIZE ===")
+                while True:
+                    size_input = input(f"{coin_winner}, choose team size (3 or 4 Pokemon per team): ").strip()
                     if size_input in ['3', '4']:
                         current_team_size = int(size_input)
+                        print(f"\nEach player will select {current_team_size} Pokemon!")
                         break
                     print("Please enter either 3 or 4!")
                 
+                # Set up game with winner going first
                 gamestate = resetgame(current_team_size)
-                gamestate = playgame(gamestate, element, newgame=True)
+                # Store player names in gamestate
+                gamestate['player_names'] = {
+                    1: coin_winner,  # Winner goes first
+                    2: coin_loser    # Loser goes second
+                }
+                
+                # Pass newgame=True and skip_names=True
+                gamestate = playgame(gamestate, element, newgame=True, skip_names=True)
                 history = addtohistory(history, gamestate)
+                
             elif action == "pa" and not any_fainted:
                 gamestate = resetbattle(gamestate)
-                gamestate = playgame(gamestate, element, newgame=False)
+                gamestate = playgame(gamestate, element, newgame=False, skip_names=True)
                 history = addtohistory(history, gamestate)
         else:
             print("\n\nThank you for playing!")
